@@ -373,19 +373,11 @@ async function runIndividualDownload(
 
 /* ── 4. Share sheet của hệ điều hành ──────────────────────────── */
 
-const SHARE_SHEET_MAX_FILES = 10;
-const SHARE_SHEET_MAX_BYTES = 100 * 1024 * 1024;
-
 async function runShareSheetDownload(
   photos: Photo[],
   options: DownloadRunOptions,
 ): Promise<DownloadSummary> {
   const totalBytes = photos.reduce((sum, photo) => sum + (photo.fileSize || 0), 0);
-  if (photos.length > SHARE_SHEET_MAX_FILES || totalBytes > SHARE_SHEET_MAX_BYTES) {
-    throw new Error(
-      `Chia sẻ qua share sheet chỉ phù hợp với tối đa ${SHARE_SHEET_MAX_FILES} ảnh hoặc 100MB. Hãy dùng "Tải từng ảnh" hoặc gói ZIP.`,
-    );
-  }
 
   const reporter = createProgressReporter(options.onProgress, {
     status: "running",

@@ -114,9 +114,9 @@ export function IosPhotosSaver({
         <p className="flex gap-2 rounded-2xl border border-success/35 bg-success/10 px-3.5 py-3 text-[12.5px] leading-relaxed">
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
           <span>
-            Đã gửi toàn bộ {formatCount(photos.length)} ảnh qua share sheet
-            {batches.length > 1 ? ` trong ${batches.length} đợt` : ""}. Nếu bảng chia sẻ chưa lưu
-            hết, mở ứng dụng <strong>Tệp</strong> rồi chọn ảnh và bấm <em>Lưu vào Ảnh</em>.
+            Đã hoàn tất thao tác chia sẻ {formatCount(photos.length)} ảnh.
+            Hãy kiểm tra ứng dụng Ảnh để xác nhận các ảnh đã được lưu thành công.
+            Nếu bảng chia sẻ chưa lưu hết, mở ứng dụng <strong>Tệp</strong> rồi chọn ảnh và bấm <em>Lưu vào Ảnh</em>.
           </span>
         </p>
         <div className="flex flex-wrap gap-2">
@@ -187,7 +187,7 @@ export function IosPhotosSaver({
           ? `Đang chuẩn bị đợt ${batchIndex + 1}/${batches.length}…`
           : stopped
             ? `Thử lại đợt ${batchIndex + 1}/${batches.length}`
-            : `Lưu đợt ${batchIndex + 1}/${batches.length} vào Thư viện ảnh`}
+            : "Chia sẻ ảnh vào Thư viện ảnh"}
       </Button>
 
       {preparing ? (
