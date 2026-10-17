@@ -1,0 +1,64 @@
+name = "cloude-archive"
+main = "src/index.ts"
+compatibility_date = "2026-10-12"
+compatibility_flags = ["nodejs_compat"]
+
+# ── Giao diện tĩnh: một Worker phục vụ CẢ trang web lẫn API ──────────────────
+#
+# Đây là cách triển khai KHUYẾN NGHỊ, và với yêu cầu "khách chỉ cần có liên kết
+# là xem được" thì gần như là cách DUY NHẤT chạy đúng ngay: khi SPA và API cùng
+# một origin thì không có CORS, nên trình duyệt của khách (không có cấu hình gì)
+# gọi được `/api/shared/...` và `/dl/...` mà không cần thêm gì.
+#
+# `not_found_handling` là BẮT BUỘC: liên kết chia sẻ có dạng `/share/<token>`,
+# không phải một tệp có thật trong `dist/`. Không có nó thì mọi liên kết chia sẻ
+# trả 404 ngay ở tầng asset, trước khi SPA kịp chạy.
+#
+# `directory` trỏ vào `dist/` do Vite tạo ra, nên PHẢI chạy `npm run build`
+# trước khi `wrangler deploy` (script `npm run worker:deploy` đã tự làm việc đó).
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# ── Object storage: ẢNH GỐC (bất biến) ───────────────────────────────────────
+# Kho private. Không bao giờ public. Truy cập chỉ qua Worker có xác thực.
+[[r2_buckets]]
+binding = "ORIGINALS"
+bucket_name = "cloude-originals"
+
+# ── Object storage: ảnh thu nhỏ / preview (có thể xoá và tạo lại) ────────────
+[[r2_buckets]]
+binding = "THUMBS"
+bucket_name = "cloude-thumbnails"
+
+# ── Metadata: CHỈ metadata, không bao giờ chứa nhị phân ảnh ──────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "cloude-archive"
+# Giá trị thật được ghi vào đây khi tạo database trên Cloudflare.
+# Với `wrangler dev` (local), giá trị này chỉ là chỗ giữ chỗ.
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[observability]
+enabled = true
+
+[vars]
+# Danh sách origin được phép gọi API từ trình duyệt, cách nhau bằng dấu phẩy.
+#
+# CHỈ cần khi trang web nằm ở origin KHÁC Worker (ví dụ SPA trên Vercel, API trên
+# Cloudflare). Khi một Worker phục vụ cả hai thì cùng origin nên không cần CORS.
+#
+# Khi triển khai tách origin, ĐIỀN TÊN MIỀN THẬT của trang web vào đây — nếu
+# không, trình duyệt sẽ chặn mọi request (kể cả liên kết chia sẻ của khách) trong
+# khi chủ kho vẫn thấy bình thường nếu họ vào bằng origin đã có trong danh sách.
+ALLOWED_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8787,http://127.0.0.1:8787"
+
+# WARNING thôi, KHÔNG phải hạn mức của ứng dụng. Xem worker/src/config.ts.
+PLAN_STORAGE_GB = "10"
+PLAN_CLASS_A_MILLIONS = "1"
+PLAN_CLASS_B_MILLIONS = "10"
+# Đơn giá dùng để ƯỚC TÍNH chi phí hiển thị cho người dùng (USD).
+PRICE_PER_GB_MONTH_USD = "0.015"
+PRICE_PER_MILLION_CLASS_A_USD = "4.5"
+PRICE_PER_MILLION_CLASS_B_USD = "0.36"

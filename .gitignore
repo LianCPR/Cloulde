@@ -1,0 +1,22 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.local
+.env.*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+*.tsbuildinfo
+.vercel
+coverage
+supabase/.branches
+supabase/.temp
+worker/.dev.vars
+worker/.wrangler
+.wrangler
+
+# Nhật ký chạy cục bộ (dev server, kiểm thử) — không bao giờ commit
+*.log
+.env.admin.local

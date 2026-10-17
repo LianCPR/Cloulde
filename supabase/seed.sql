@@ -1,0 +1,49 @@
+-- ═══════════════════════════════════════════════════════════════════════
+--  Cloudé — dữ liệu mẫu (TUỲ CHỌN, không bắt buộc)
+--
+--  Cách dùng:
+--    1. Đăng ký một tài khoản trong ứng dụng.
+--    2. Lấy uid:  Supabase Dashboard → Authentication → Users → copy UUID.
+--    3. Thay 'ĐIỀN-UUID-CỦA-BẠN' bên dưới rồi chạy tệp này bằng SQL Editor.
+--
+--  LƯU Ý QUAN TRỌNG: script này chỉ tạo bản ghi METADATA. Không có tệp ảnh nào
+--  được tạo trong Storage, vì vậy ảnh mẫu sẽ không xem trước hay tải xuống được.
+--  Ứng dụng luôn đọc album từ cơ sở dữ liệu chứ không dùng dữ liệu cứng — hãy
+--  dùng chính khu vực kéo-thả trong ứng dụng để tạo album và tải ảnh thật.
+-- ═══════════════════════════════════════════════════════════════════════
+
+-- do $$
+-- declare
+--   owner uuid := 'ĐIỀN-UUID-CỦA-BẠN';
+--   album_id uuid;
+-- begin
+--   insert into public.albums (owner_id, title, description, search_key, title_key)
+--   values (
+--     owner,
+--     'Album mẫu',
+--     'Album tạo bằng seed.sql — hãy xoá và tạo album thật của bạn.',
+--     'album mau',
+--     'album mau'
+--   )
+--   returning id into album_id;
+--
+--   raise notice 'Đã tạo album mẫu %', album_id;
+-- end $$;
+
+-- ── Kiểm tra nhanh sau khi migrate ─────────────────────────────────────
+-- 1. Đã bật RLS trên mọi bảng chưa?
+--    select relname, relrowsecurity
+--      from pg_class where relname in ('albums','photos','album_shares','profiles');
+--    → cột relrowsecurity phải là true cho tất cả.
+--
+-- 2. Đã có đủ index cho truy vấn nóng chưa?
+--    select tablename, indexname from pg_indexes
+--     where schemaname = 'public' order by tablename, indexname;
+--
+-- 3. Bucket đã tạo đúng cờ riêng tư chưa?
+--    select id, public, file_size_limit from storage.buckets
+--     where id like 'photo-%';
+--    → cột public phải là false.
+--
+-- 4. Đối soát số liệu album (nếu nghi ngờ trigger bị lệch):
+--    select public.recompute_album_totals('<album_id>');

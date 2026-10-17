@@ -1,0 +1,28 @@
+# Cloudé — kho ảnh riêng tư.
+#
+# ỨNG DỤNG KHÔNG CHẶN /share/ Ở ĐÂY, VÀ ĐÓ LÀ CHỦ Ý.
+#
+# Với liên kết chia sẻ, token trong URL chính là quyền truy cập album. Muốn máy
+# tìm kiếm KHÔNG đánh chỉ mục liên kết thì trình thu thập phải ĐỌC ĐƯỢC trang để
+# thấy thẻ `noindex` (và header `X-Robots-Tag`). Nếu chặn `/share/` ở đây, nó sẽ
+# không tải trang, không thấy `noindex`, và URL vẫn có thể xuất hiện trong kết quả
+# tìm kiếm khi được liên kết từ nơi khác — tức là làm hại chính điều ta muốn tránh.
+#
+# Vì vậy: cho phép thu thập `/share/`, nhưng trang đó tự nói "đừng đánh chỉ mục".
+
+User-agent: *
+Allow: /
+
+# API và URL tải xuống có chữ ký: không có gì để đánh chỉ mục.
+Disallow: /api/
+Disallow: /dl/
+
+# Khu vực chỉ dành cho chủ kho.
+Disallow: /albums/
+Disallow: /upload
+Disallow: /settings
+Disallow: /connect
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
