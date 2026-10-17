@@ -163,7 +163,7 @@ export function SharedAlbumPage() {
   if (needsPassword && !access) {
     return (
       <div className="mx-auto flex max-w-md flex-col justify-center py-8 sm:py-16">
-        <Link to="/" className="mx-auto mb-6" aria-label="Cloudé">
+        <Link to="/" className="mx-auto mb-6" aria-label="Cloudey">
           <Wordmark />
         </Link>
         <form
@@ -218,7 +218,7 @@ export function SharedAlbumPage() {
         />
         <div className="mt-5 text-center">
           <Link to="/" className="text-[13px] font-medium text-rose-text underline underline-offset-2">
-            Về trang chủ Cloudé
+            Về trang chủ Cloudey
           </Link>
         </div>
       </div>
@@ -338,7 +338,7 @@ export function SharedAlbumPage() {
       />
 
       <p className="pb-6 text-center text-[11.5px] text-ink-soft">
-        Ảnh được tải ở chất lượng gốc — Cloudé không nén lại hay thay đổi dữ liệu ảnh.{" "}
+        Ảnh được tải ở chất lượng gốc — Cloudey không nén lại hay thay đổi dữ liệu ảnh.{" "}
         <Link to="/signup" className="text-rose-text underline underline-offset-2">
           Tạo thư viện riêng của bạn
         </Link>

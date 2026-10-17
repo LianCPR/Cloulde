@@ -128,7 +128,7 @@ export function HomePage() {
             Kho ảnh gốc của bạn, đẹp như một cuốn album
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-[14.5px] leading-relaxed text-ink-soft">
-            Cloudé lưu ảnh ở chất lượng nguyên bản — không nén lại, không đổi định dạng, không mất
+            Cloudey lưu ảnh ở chất lượng nguyên bản — không nén lại, không đổi định dạng, không mất
             metadata. Bạn sắp xếp theo album, chia sẻ bằng liên kết riêng tư, và tải về đúng tệp gốc
             bất cứ lúc nào.
           </p>
@@ -251,7 +251,7 @@ export function HomePage() {
         ) : (
           <EmptyState
             title="Thư viện còn trống"
-            description="Hãy tạo album đầu tiên rồi kéo thả ảnh vào. Cloudé giữ nguyên tệp gốc, kể cả ảnh RAW và HEIC."
+            description="Hãy tạo album đầu tiên rồi kéo thả ảnh vào. Cloudey giữ nguyên tệp gốc, kể cả ảnh RAW và HEIC."
             action={
               <Button
                 onClick={() => setCreateOpen(true)}

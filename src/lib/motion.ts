@@ -1,7 +1,7 @@
 import type { Transition, Variants } from "motion/react";
 
 /**
- * Nguyên tắc chuyển động của Cloudé:
+ * Nguyên tắc chuyển động của Cloudey:
  *  - Chỉ animate `transform` và `opacity` để không gây layout shift.
  *  - Không quá 420ms cho điều hướng; không chặn thao tác tải xuống.
  *  - Tôn trọng `prefers-reduced-motion`: mọi biến thể đều có bản "tĩnh".

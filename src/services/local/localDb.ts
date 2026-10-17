@@ -64,7 +64,7 @@ export interface LocalPhotoRecord extends Photo {
   filenameKey: string;
 }
 
-interface CloudéLocalDb extends DBSchema {
+interface CloudeyLocalDb extends DBSchema {
   users: {
     key: string;
     value: LocalUserRecord;
@@ -112,11 +112,11 @@ interface CloudéLocalDb extends DBSchema {
 
 export const LOCAL_DB_NAME = "cloude-local";
 
-let dbPromise: Promise<IDBPDatabase<CloudéLocalDb>> | null = null;
+let dbPromise: Promise<IDBPDatabase<CloudeyLocalDb>> | null = null;
 
-export function getLocalDb(): Promise<IDBPDatabase<CloudéLocalDb>> {
+export function getLocalDb(): Promise<IDBPDatabase<CloudeyLocalDb>> {
   if (!dbPromise) {
-    dbPromise = openDB<CloudéLocalDb>(LOCAL_DB_NAME, 1, {
+    dbPromise = openDB<CloudeyLocalDb>(LOCAL_DB_NAME, 1, {
       upgrade(db) {
         const users = db.createObjectStore("users", { keyPath: "id" });
         users.createIndex("byEmail", "email", { unique: true });

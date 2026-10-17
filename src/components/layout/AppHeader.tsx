@@ -89,7 +89,7 @@ export function AppHeader({
         <Link
           to="/"
           className="flex items-center rounded-full px-1 py-1 transition-opacity hover:opacity-80"
-          aria-label="Cloudé — về trang thư viện"
+          aria-label="Cloudey — về trang thư viện"
         >
           <Wordmark />
         </Link>

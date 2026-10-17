@@ -119,7 +119,7 @@ export const ZIP_MAX_FILES = readNumber(env.VITE_ZIP_MAX_FILES, 2000);
 
 export const SHARE_FUNCTION_NAME = readString(env.VITE_SHARE_FUNCTION, "share");
 
-export const APP_NAME = "Cloudé";
+export const APP_NAME = "Cloudey";
 
 /** Thời hạn signed URL cho ảnh xem trước / tải về (giây). */
 export const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 giờ

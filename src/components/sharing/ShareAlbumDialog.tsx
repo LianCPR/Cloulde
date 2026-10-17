@@ -147,7 +147,7 @@ export function ShareAlbumDialog({
 
   const shareNow = async (token: string) => {
     const url = buildShareUrl(token);
-    const data = { title: album.title, text: `Album “${album.title}” trên Cloudé`, url };
+    const data = { title: album.title, text: `Album “${album.title}” trên Cloudey`, url };
     try {
       if (navigator.share) {
         await navigator.share(data);

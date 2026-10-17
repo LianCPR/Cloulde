@@ -446,7 +446,7 @@ export function AlbumPage() {
           khỏi kho lưu trữ. Chỉ các tệp thuộc album này bị xoá — không ảnh hưởng album khác.
         </p>
         <p className="mt-3 rounded-2xl bg-beige/60 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-ink">
-          Nếu bạn chưa có bản sao nào ở nơi khác, hãy tải album về trước khi xoá. Cloudé không tự
+          Nếu bạn chưa có bản sao nào ở nơi khác, hãy tải album về trước khi xoá. Cloudey không tự
           động sao lưu ảnh gốc.
         </p>
       </Dialog>

@@ -64,7 +64,7 @@ export function ArchiveConnectPage() {
   return (
     <AuthCard
       title="Kết nối kho lưu trữ"
-      subtitle="Cloudé trò chuyện với Worker Cloudflare của bạn. Khoá truy cập R2 không bao giờ rời khỏi Worker."
+      subtitle="Cloudey trò chuyện với Worker Cloudflare của bạn. Khoá truy cập R2 không bao giờ rời khỏi Worker."
       footer={
         <>
           Chưa triển khai? Xem hướng dẫn trong{" "}

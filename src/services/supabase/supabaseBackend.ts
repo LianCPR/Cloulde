@@ -549,8 +549,10 @@ const usageRepository: UsageRepository = {
       usedBytes: Number(row?.used_bytes ?? 0),
       photoCount: Number(row?.photo_count ?? 0),
       albumCount: Number(row?.album_count ?? 0),
-      // Hạn mức của gói Supabase Free; có thể đổi ở trang Cài đặt.
-      quotaBytes: 1024 * 1024 * 1024,
+      // 5 GB — hạn mức hiển thị mà người dùng chủ kho tự đặt (không phải hạn
+      // mức cứng của Supabase Free). Có thể đổi trong app; bucket thật vẫn
+      // theo các giới hạn của gói Supabase đang dùng.
+      quotaBytes: 5 * 1024 * 1024 * 1024,
     };
   },
 };

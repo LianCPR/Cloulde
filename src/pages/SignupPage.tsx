@@ -55,7 +55,7 @@ export function SignupPage() {
 
   return (
     <AuthCard
-      title="Tạo tài khoản Cloudé"
+      title="Tạo tài khoản Cloudey"
       subtitle="Miễn phí để bắt đầu. Ảnh gốc của bạn được lưu nguyên vẹn và chỉ mình bạn quyết định ai xem được."
       footer={
         <>
@@ -88,7 +88,7 @@ export function SignupPage() {
           type="password"
           autoComplete="new-password"
           required
-          hint="Tối thiểu 8 ký tự. Nên dùng mật khẩu riêng cho Cloudé."
+          hint="Tối thiểu 8 ký tự. Nên dùng mật khẩu riêng cho Cloudey."
           error={errors.password?.message ?? null}
           {...register("password")}
         />
@@ -118,7 +118,7 @@ export function SignupPage() {
         </Button>
 
         <p className="text-[11.5px] leading-relaxed text-ink-soft">
-          Mật khẩu không bao giờ được lưu trong cơ sở dữ liệu của Cloudé — Supabase Auth quản lý
+          Mật khẩu không bao giờ được lưu trong cơ sở dữ liệu của Cloudey — Supabase Auth quản lý
           riêng phần xác thực.
         </p>
       </form>

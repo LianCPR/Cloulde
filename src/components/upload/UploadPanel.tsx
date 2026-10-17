@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { ActiveUploadSession, Photo, UploadItem } from "@/types";
 import { uploadLimitBytes } from "@/config/env";
+import { isUploadAckValid, markUploadAck } from "@/lib/uploadAck";
 import { PHOTO_ACCEPT_ATTRIBUTE as ACCEPT } from "@/lib/fileTypes";
 import { useUploadQueue } from "@/hooks/useUploadQueue";
 import { Button } from "@/components/ui/Button";
@@ -48,6 +49,17 @@ export function UploadPanel({
   const [showDetails, setShowDetails] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dragDepth = useRef(0);
+
+  /**
+   * "Đã đọc và xác nhận": mỗi trình duyệt chỉ cần xác nhận MỘT lần. Đã lưu
+   * localStorage từ trước thì ô này tự được coi là đã tick — người dùng không
+   * phải tick lại mỗi lần tải ảnh.
+   */
+  const [ackPlanned, setAckPlanned] = useState<boolean | null>(null);
+  useEffect(() => {
+    setAckPlanned(isUploadAckValid());
+  }, []);
+  const [ack, setAck] = useState(false);
 
   const {
     items,
@@ -104,6 +116,24 @@ export function UploadPanel({
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
+      // Rào chắn "Đã đọc và xác nhận": chặn ngay khi CHƯA tick, trước khi
+      // cần thêm tệp vào hàng đợi.
+      if (ackPlanned === null) {
+        announce("Hãy chờ một nhịp — trang đang chuẩn bị xác nhận điều khoản.", "assertive");
+        return;
+      }
+      if (!ackPlanned && !ack) {
+        announce(
+          "Bạn cần tích vào ô 'Đã đọc và xác nhận' phía trên trước khi gửi ảnh.",
+          "assertive",
+        );
+        return;
+      }
+      // Lần đầu tiên xác nhận xong — ghi nhớ vĩnh viễn cho trình duyệt này.
+      if (!ackPlanned && ack) {
+        markUploadAck();
+        setAckPlanned(true);
+      }
       if (!files || files.length === 0) return;
       const list = Array.from(files);
       const tooLarge = list.filter((file) => file.size > uploadLimitBytes);
@@ -116,7 +146,7 @@ export function UploadPanel({
         );
       }
     },
-    [addFiles],
+    [addFiles, ack, ackPlanned],
   );
 
   const onDrop = useCallback(
@@ -153,6 +183,41 @@ export function UploadPanel({
             : "border-line bg-warm/70 hover:border-rose/40",
         )}
       >
+        {/* CHECKBOX ĐÃ ĐỌC VÀ XÁC NHẬN — người dùng phải đọc rồi tick trước khi gửi */}
+        {ackPlanned === false ? (
+          <motion.label
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 flex max-w-md cursor-pointer items-start gap-3 rounded-2xl border border-rose/30 bg-pastel/40 px-4 py-3 text-left text-[12.5px] leading-relaxed"
+          >
+            <input
+              type="checkbox"
+              checked={ack}
+              onChange={(event) => setAck(event.target.checked)}
+              className="mt-0.5 size-4 shrink-0 accent-rose"
+              aria-required="true"
+            />
+            <span>
+              Tôi đã đọc{" "}
+              <a
+                href="/terms"
+                target="_blank"
+                className="font-medium text-rose-text underline underline-offset-2"
+              >
+                Điều khoản sử dụng
+              </a>{" "}
+              và{" "}
+              <a
+                href="/privacy"
+                target="_blank"
+                className="font-medium text-rose-text underline underline-offset-2"
+              >
+                Chính sách quyền riêng tư
+              </a>
+              , và xác nhận toàn bộ ảnh tôi gửi lên là của tôi hoặc tôi có quyền chia sẻ.
+            </span>
+          </motion.label>
+        ) : null}
         <input
           ref={inputRef}
           type="file"

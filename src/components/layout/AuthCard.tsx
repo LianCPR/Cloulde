@@ -16,7 +16,7 @@ export function AuthCard({
 }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col justify-center py-6 sm:py-12">
-      <Link to="/" className="mx-auto mb-6 inline-flex" aria-label="Cloudé — về trang chủ">
+      <Link to="/" className="mx-auto mb-6 inline-flex" aria-label="Cloudey — về trang chủ">
         <Wordmark />
       </Link>
 

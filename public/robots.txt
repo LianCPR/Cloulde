@@ -1,4 +1,4 @@
-# Cloudé — kho ảnh riêng tư.
+# Cloudey — kho ảnh riêng tư.
 #
 # ỨNG DỤNG KHÔNG CHẶN /share/ Ở ĐÂY, VÀ ĐÓ LÀ CHỦ Ý.
 #

@@ -81,7 +81,7 @@ export function UploadPage() {
     return (
       <EmptyState
         title="Đăng nhập để tải ảnh lên"
-        description="Cloudé cần biết ảnh thuộc về ai trước khi lưu trữ."
+        description="Cloudey cần biết ảnh thuộc về ai trước khi lưu trữ."
         action={
           <Link
             to="/login?next=/upload"
@@ -139,7 +139,7 @@ export function UploadPage() {
       <header className="space-y-1">
         <h1 className="font-display text-[26px] leading-tight sm:text-3xl">Tải ảnh lên</h1>
         <p className="text-[13.5px] text-ink-soft">
-          Ảnh gốc được lưu nguyên byte. Bạn có thể chọn hàng trăm tệp cùng lúc — Cloudé sẽ tải lên
+          Ảnh gốc được lưu nguyên byte. Bạn có thể chọn hàng trăm tệp cùng lúc — Cloudey sẽ tải lên
           theo hàng đợi và tự thử lại khi mạng yếu.
         </p>
       </header>

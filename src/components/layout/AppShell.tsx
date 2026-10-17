@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { AppHeader } from "./AppHeader";
 import { Sidebar } from "./Sidebar";
 import { MobileNavigation } from "./MobileNavigation";
+import { SiteFooter } from "./SiteFooter";
 import { CloudBackdrop } from "@/components/ui/CloudBackdrop";
 import { ErrorBoundary } from "@/components/system/ErrorBoundary";
 import { BackendNotice } from "@/components/system/BackendNotice";
 import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
-import { pageVariants, pageVariantsReduced } from "@/lib/motion";
 import { isGuestPath } from "@/lib/appRoutes";
 
 const SIDEBAR_KEY = "cloude-sidebar-open";
@@ -66,22 +66,27 @@ export function AppShell() {
         {guest ? null : <Sidebar open={sidebarOpen} />}
         <main id="noi-dung-chinh" className="min-w-0 flex-1 px-4 pb-28 pt-6 sm:px-6 sm:pt-8 md:pb-16">
           <ErrorBoundary>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={location.pathname}
-                variants={reduced ? pageVariantsReduced : pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
+            {/*
+              Chuyển trang KHÔNG dùng AnimatePresence mode="wait" — kiểu cũ
+              ép phải đợi hết exit (180ms) rồi mới mount trang mới (320ms),
+              tổng ~500ms nội dung trắng/ờ mờ, cảm giác lag giật. Giờ trang
+              mới mount ngay và chỉ fade-in nhẹ 160ms; không có exit.
+            */}
+            <motion.div
+              key={location.pathname}
+              initial={reduced ? false : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: reduced ? 0.01 : 0.16, ease: "easeOut" }}
+            >
+              <Outlet />
+            </motion.div>
           </ErrorBoundary>
         </main>
       </div>
 
       {guest ? null : <MobileNavigation />}
+
+      <SiteFooter />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,7 +21,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function LoginPage() {
-  const { signIn } = useAuth();
+  const { signIn, user, initializing } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +55,12 @@ export function LoginPage() {
   });
 
   if (archiveMode) return <ArchiveConnectPage />;
+
+  // Đã đăng nhập mà tới /login (ví dụ bấm tab "Tài khoản"): chuyển thẳng
+  // sang trang cài đặt — nơi có thông tin tài khoản và nút đăng xuất —
+  // thay vì hỏi lại mật khẩu. Chờ phiên được đọc xong rồi mới quyết định
+  // để không đá người dùng ra giữa chừng khi vừa mở trang.
+  if (!initializing && user) return <Navigate to="/settings" replace />;
 
   return (
     <AuthCard

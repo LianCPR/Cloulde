@@ -119,7 +119,7 @@ export function SettingsPage() {
       <header>
         <h1 className="font-display text-[26px] leading-tight sm:text-3xl">Cài đặt</h1>
         <p className="mt-1 text-[13.5px] text-ink-soft">
-          Quản lý tài khoản, dung lượng lưu trữ và cách Cloudé tải ảnh gốc về máy bạn.
+          Quản lý tài khoản, dung lượng lưu trữ và cách Cloudey tải ảnh gốc về máy bạn.
         </p>
       </header>
 
@@ -217,7 +217,7 @@ export function SettingsPage() {
               {backend.mode === "archive"
                 ? "Số liệu đo trực tiếp từ cơ sở dữ liệu của kho lưu trữ. KHÔNG có hạn mức dung lượng hay số ảnh do ứng dụng đặt: trần thực tế là gói Cloudflare, trạng thái tài khoản và phương thức thanh toán của bạn."
                 : backend.mode === "supabase"
-                  ? "Hạn mức mặc định lấy theo gói Supabase Free (1GB lưu trữ, 50MB mỗi tệp). Bạn có thể nâng hạn mức trong cấu hình bucket."
+                  ? "Hạn mức hiển thị 5 GB do chủ kho đặt. Giới hạn thật theo gói Supabase đang dùng (Free: tổng dung lượng project và 50 MB mỗi tệp — nâng ở Dashboard khi cần)."
                   : "Chế độ demo cục bộ: dung lượng thực tế bị giới hạn bởi hạn mức IndexedDB của trình duyệt (thường vài GB)."}
             </p>
           </div>
@@ -300,7 +300,7 @@ export function SettingsPage() {
         )}
         <p className="mt-3 text-[12px] leading-relaxed text-ink-soft">
           Mỗi liên kết có thể bật/tắt tải xuống, đặt mật khẩu, hẹn ngày hết hạn và thu hồi bất cứ
-          lúc nào. Cloudé chỉ lưu bản băm của token nên liên kết chỉ hiển thị đầy đủ một lần khi tạo.
+          lúc nào. Cloudey chỉ lưu bản băm của token nên liên kết chỉ hiển thị đầy đủ một lần khi tạo.
         </p>
       </Section>
 
@@ -365,7 +365,7 @@ export function SettingsPage() {
             chọn thư mục đích (Chrome/Edge) hoặc chia nhỏ album.
           </li>
           <li>
-            • Cloudé không tự sao lưu ảnh gốc. Hãy giữ thêm một bản sao độc lập cho kho ảnh của bạn.
+            • Cloudey không tự sao lưu ảnh gốc. Hãy giữ thêm một bản sao độc lập cho kho ảnh của bạn.
           </li>
         </ul>
       </Section>
