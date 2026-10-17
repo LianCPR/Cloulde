@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback: mọi đường không trúng tệp tĩnh đều trả index.html
+# (bắt buộc cho /share/<token> và /albums/<id> khi người dùng tải lại trang).
+# .env.production trong repo đã chứa VITE_BACKEND/URL/anon key cho build.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
