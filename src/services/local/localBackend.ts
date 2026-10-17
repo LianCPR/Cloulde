@@ -366,7 +366,7 @@ const photoRepository: PhotoRepository = {
       throw new ForbiddenError("Bạn không có quyền xem album này.");
     }
 
-    const limit = Math.min(Math.max(query.limit ?? 60, 1), 200);
+    const limit = Math.min(Math.max(query.limit ?? 400, 1), 400);
     const sort = query.sort ?? "uploaded-desc";
     const indexName =
       sort === "uploaded-asc"
@@ -731,7 +731,7 @@ const shareRepository: ShareRepository = {
   async listSharedPhotos(token, password, query): Promise<Paged<Photo>> {
     const { album } = await verifyShareAccess(token, password);
     const db = await getLocalDb();
-    const limit = Math.min(Math.max(query.limit ?? 60, 1), 200);
+    const limit = Math.min(Math.max(query.limit ?? 400, 1), 400);
     const sort = query.sort ?? "uploaded-desc";
     const indexName =
       sort === "uploaded-asc"

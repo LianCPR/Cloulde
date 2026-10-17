@@ -169,8 +169,8 @@ export interface ThumbnailResult {
  */
 export async function generateThumbnail(
   file: Blob,
-  maxEdge = 640,
-  quality = 0.82,
+  maxEdge = 480,
+  quality = 0.76,
 ): Promise<ThumbnailResult | null> {
   if (typeof document === "undefined" || typeof createImageBitmap !== "function") {
     return null;

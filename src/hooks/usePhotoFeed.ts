@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Photo, PhotoSort } from "@/types";
-import { photoService } from "@/services/photoService";
+import { mediaUrlCache, photoService } from "@/services/photoService";
 import { describeError } from "@/services/errors";
 
 export interface PhotoFeedOptions {
@@ -30,15 +30,28 @@ export interface PhotoFeedState {
   updateLocal: (photoId: string, patch: Partial<Photo>) => void;
 }
 
+async function prefetchThumbnails(photos: Photo[]): Promise<void> {
+  // Ký URL là bước tối ưu. Nếu nó lỗi tạm thời, vẫn render lưới để từng card
+  // có thể tự xin URL và người dùng không bị một lỗi prefetch chặn cả album.
+  await mediaUrlCache
+    .prefetch(
+      "thumbnail",
+      photos.flatMap((photo) => (photo.thumbnailPath ? [photo.thumbnailPath] : [])),
+    )
+    .catch(() => undefined);
+}
+
 /**
  * Nạp ảnh theo trang bằng con trỏ.
  *
- * Không bao giờ tải toàn bộ album một lần: mỗi trang mặc định 60 ảnh metadata.
+ * Mỗi trang lấy tối đa 400 bản ghi metadata. Byte ảnh không nằm trong phản hồi
+ * này: URL thumbnail được ký theo lô trước khi lưới được vẽ, còn trình duyệt
+ * vẫn tự lazy-load dữ liệu thumbnail gần vùng nhìn thấy.
  * Mọi yêu cầu cũ bị huỷ bằng cờ `stale` khi tham số thay đổi, tránh tình trạng
  * dữ liệu của album trước ghi đè album đang xem.
  */
 export function usePhotoFeed(options: PhotoFeedOptions): PhotoFeedState {
-  const { albumId, sort, pageSize = 60, enabled = true } = options;
+  const { albumId, sort, pageSize = 400, enabled = true } = options;
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -58,6 +71,12 @@ export function usePhotoFeed(options: PhotoFeedOptions): PhotoFeedState {
       const page = fetchPage
         ? await fetchPage(null)
         : await photoService.list({ albumId, cursor: null, limit: pageSize, sort });
+      if (current !== requestId.current) return;
+      // Một lô Supabase có thể ký 100 URL một lần. Làm trước khi render giúp
+      // 400 PhotoCard không phát sinh 400 request createSignedUrl độc lập.
+      if (!fetchPage) {
+        await prefetchThumbnails(page.items);
+      }
       if (current !== requestId.current) return;
       setPhotos(page.items);
       setNextCursor(page.nextCursor);
@@ -84,6 +103,10 @@ export function usePhotoFeed(options: PhotoFeedOptions): PhotoFeedState {
         const page = fetchPage
           ? await fetchPage(nextCursor)
           : await photoService.list({ albumId, cursor: nextCursor, limit: pageSize, sort });
+        if (current !== requestId.current) return;
+        if (!fetchPage) {
+          await prefetchThumbnails(page.items);
+        }
         if (current !== requestId.current) return;
         setPhotos((previous) => {
           const seen = new Set(previous.map((photo) => photo.id));

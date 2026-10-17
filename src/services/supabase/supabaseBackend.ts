@@ -294,7 +294,7 @@ const photoRepository: PhotoRepository = {
   async list(query: PhotoQuery): Promise<Paged<Photo>> {
     const supabase = requireSupabaseClient();
     await requireUserId();
-    const limit = Math.min(Math.max(query.limit ?? 60, 1), 200);
+    const limit = Math.min(Math.max(query.limit ?? 400, 1), 400);
     const sort = query.sort ?? "uploaded-desc";
     const cursor = decodeCursor(query.cursor);
     const orderColumn = sort === "filename-asc" ? "filename_key" : "created_at";

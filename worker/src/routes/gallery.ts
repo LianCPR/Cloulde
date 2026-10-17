@@ -150,7 +150,7 @@ function photoDto(row: Awaited<ReturnType<typeof listPhotos>>[number]) {
 export async function listPhotosRoute(ctx: Ctx, albumId: string): Promise<Response> {
   const album = await getAlbum(ctx.env.DB, albumId, ctx.ownerId);
   if (!album) throw new HttpError(404, "Không tìm thấy album.");
-  const limit = pageLimit(ctx.url.searchParams.get("limit"));
+  const limit = pageLimit(ctx.url.searchParams.get("limit"), 400, 400);
   const sort = pickSort(
     ctx.url.searchParams.get("sort"),
     ["uploaded-desc", "uploaded-asc", "filename-asc"] as const,

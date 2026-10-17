@@ -38,7 +38,8 @@ export interface PhotoViewerProps {
  * - Bàn phím: ←/→ chuyển ảnh, Esc đóng, +/- phóng, 0 đặt lại.
  * - Mobile: vuốt ngang để chuyển ảnh, chạm hai ngón để phóng, kéo để di chuyển
  *   khi đang phóng.
- * - Ảnh kế tiếp được nạp trước để chuyển ảnh không bị chờ.
+ * - Không nạp trước ảnh gốc kế bên: một ảnh có thể hàng chục MB; việc đó làm
+ *   nghẽn mạng và khiến lưới ảnh chậm trên kết nối yếu.
  */
 export function PhotoViewer({
   photos,
@@ -94,23 +95,6 @@ export function PhotoViewer({
       active = false;
     };
   }, [index, photo, photos.length, resolveViewerUrl]);
-
-  // Nạp trước ảnh kế tiếp và ảnh trước đó để chuyển ảnh tức thì.
-  useEffect(() => {
-    if (index === null) return;
-    const neighbours = [photos[index + 1], photos[index - 1]].filter(Boolean) as Photo[];
-    let cancelled = false;
-    void (async () => {
-      for (const neighbour of neighbours) {
-        if (cancelled) return;
-        if (!neighbour.previewable) continue;
-        await resolveViewerUrl(neighbour).catch(() => undefined);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [index, photos, resolveViewerUrl]);
 
   // Bàn phím + khoá cuộn nền khi mở.
   useEffect(() => {

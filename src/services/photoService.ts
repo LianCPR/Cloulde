@@ -37,6 +37,7 @@ interface CacheEntry {
  */
 class MediaUrlCache {
   private entries = new Map<string, CacheEntry>();
+  private readonly maxSignedUrlEntries = 800;
 
   private key(kind: StorageKind, path: string): string {
     return `${kind}:${path}`;
@@ -45,6 +46,21 @@ class MediaUrlCache {
   private provider(kind: StorageKind) {
     const backend = getBackend();
     return kind === "thumbnail" ? backend.thumbnailStorage : backend.storage;
+  }
+
+  /** Giữ signed URL còn hạn để cuộn/quay lại album không phải ký lại. */
+  private prune(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.entries) {
+      if (entry.refs === 0 && entry.expiresAt <= now) this.entries.delete(key);
+    }
+    if (this.entries.size <= this.maxSignedUrlEntries) return;
+
+    // Map giữ thứ tự chèn; chỉ loại URL không còn component nào dùng.
+    for (const [key, entry] of this.entries) {
+      if (this.entries.size <= this.maxSignedUrlEntries) return;
+      if (entry.refs === 0 && !entry.url.startsWith("blob:")) this.entries.delete(key);
+    }
   }
 
   /** Lấy URL cho một đường dẫn; tự tăng tham chiếu. */
@@ -72,6 +88,7 @@ class MediaUrlCache {
         throw error;
       });
     this.entries.set(key, entry);
+    this.prune();
     return entry.promise;
   }
 
@@ -79,13 +96,14 @@ class MediaUrlCache {
     const key = this.key(kind, path);
     const entry = this.entries.get(key);
     if (!entry) return;
-    entry.refs -= 1;
-    if (entry.refs <= 0) {
+    entry.refs = Math.max(0, entry.refs - 1);
+    // Blob URL là dữ liệu nằm trong RAM, phải thu hồi ngay. Signed URL chỉ là
+    // chuỗi ngắn; giữ nó tới lúc hết hạn để tránh ký lại khi card mount lại.
+    if (entry.refs === 0 && entry.url.startsWith("blob:")) {
       this.entries.delete(key);
-      if (entry.url.startsWith("blob:")) {
-        queueMicrotask(() => URL.revokeObjectURL(entry.url));
-      }
+      queueMicrotask(() => URL.revokeObjectURL(entry.url));
     }
+    this.prune();
   }
 
   /** Nạp trước URL cho một loạt đường dẫn, gộp yêu cầu ký URL khi có thể. */
@@ -98,35 +116,35 @@ class MediaUrlCache {
     if (pending.length === 0) return;
 
     const provider = this.provider(kind);
+    // Không tải blob chỉ để "prefetch URL" ở backend local. Lợi ích của bước
+    // này là API ký URL theo lô của Supabase/Archive, không phải tải byte ảnh.
+    if (!provider.createUrls) return;
     const batchSize = 100;
-    for (let index = 0; index < pending.length; index += batchSize) {
-      const batch = pending.slice(index, index + batchSize);
-      if (provider.createUrls && batch.length > 1) {
-        try {
-          const urls = await provider.createUrls(batch, SIGNED_URL_TTL_SECONDS);
-          for (const [path, url] of Object.entries(urls)) {
-            const key = this.key(kind, path);
-            const entry = this.entries.get(key);
-            if (entry) {
-              entry.url = url;
-              entry.expiresAt = Date.now() + 50 * 60 * 1000;
-              entry.promise = Promise.resolve(url);
-            } else {
-              this.entries.set(key, {
-                url,
-                expiresAt: Date.now() + 50 * 60 * 1000,
-                refs: 0,
-                promise: Promise.resolve(url),
-              });
-            }
+    const batches = Array.from({ length: Math.ceil(pending.length / batchSize) }, (_, index) =>
+      pending.slice(index * batchSize, (index + 1) * batchSize),
+    );
+    await Promise.all(
+      batches.map(async (batch) => {
+        const urls = await provider.createUrls!(batch, SIGNED_URL_TTL_SECONDS);
+        for (const [path, url] of Object.entries(urls)) {
+          const key = this.key(kind, path);
+          const entry = this.entries.get(key);
+          if (entry) {
+            entry.url = url;
+            entry.expiresAt = Date.now() + 50 * 60 * 1000;
+            entry.promise = Promise.resolve(url);
+          } else {
+            this.entries.set(key, {
+              url,
+              expiresAt: Date.now() + 50 * 60 * 1000,
+              refs: 0,
+              promise: Promise.resolve(url),
+            });
           }
-          continue;
-        } catch {
-          // Rơi xuống đường đi từng ảnh.
         }
-      }
-      await Promise.all(batch.map((path) => this.acquire(kind, path).catch(() => null)));
-    }
+      }),
+    );
+    this.prune();
   }
 
   clear(): void {
@@ -139,13 +157,11 @@ class MediaUrlCache {
 
 export const mediaUrlCache = new MediaUrlCache();
 
-/** Đường dẫn hiển thị của một ảnh: ưu tiên ảnh thu nhỏ, không có thì dùng ảnh gốc. */
+/** Lưới chỉ dùng thumbnail; không bao giờ rơi về ảnh gốc vài chục MB. */
 export function resolveDisplayPath(
-  photo: Pick<Photo, "thumbnailPath" | "storagePath" | "previewable">,
+  photo: Pick<Photo, "thumbnailPath">,
 ): { kind: StorageKind; path: string } | null {
   if (photo.thumbnailPath) return { kind: "thumbnail", path: photo.thumbnailPath };
-  // Không có ảnh thu nhỏ (RAW/TIFF/HEIC): chỉ hiển thị khi trình duyệt giải mã được.
-  if (photo.previewable) return { kind: "original", path: photo.storagePath };
   return null;
 }
 
@@ -154,9 +170,6 @@ export function resolveAlbumCover(
   album: Pick<Album, "coverThumbnailPath" | "coverStoragePath" | "coverPreviewable">,
 ): { kind: StorageKind; path: string } | null {
   if (album.coverThumbnailPath) return { kind: "thumbnail", path: album.coverThumbnailPath };
-  if (album.coverStoragePath && album.coverPreviewable) {
-    return { kind: "original", path: album.coverStoragePath };
-  }
   return null;
 }
 

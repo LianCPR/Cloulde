@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Lock, ShieldCheck, Smartphone } from "lucide-react";
-import type { Photo, ShareAccess } from "@/types";
+import type { Paged, Photo, ShareAccess } from "@/types";
 import { shareService } from "@/services/shareService";
 import { describeError, isUnreachableError, ShareAccessError } from "@/services/errors";
+import { sourceFromResponse } from "@/services/originalSource";
+import { toastError } from "@/components/ui/Toast";
+import { isArchiveMode } from "@/services/backend";
 import { useSelection } from "@/hooks/useSelection";
 import { useDownloadFlow } from "@/hooks/useDownloadFlow";
 import { PhotoGrid } from "@/components/photos/PhotoGrid";
@@ -44,6 +47,15 @@ export function SharedAlbumPage() {
 
   // Bộ nhớ đệm signed URL cho khách: cùng ảnh không bị ký lại nhiều lần.
   const sharedUrlCache = useRef(new Map<string, string>());
+  // Lượt ký theo lô ĐANG chạy: thẻ ảnh chờ chung một promise thay vì mỗi thẻ
+  // xin một lượt riêng — 351 lượt riêng sẽ vượt rate limit 60 lời gọi/phút của
+  // Edge Function khiến ảnh "treo" giữa chừng.
+  const sharedUrlPending = useRef(new Map<string, Promise<string | null>>());
+  // URL ảnh gốc đã ký sẵn cho phiên tải xuống (signed URL có hạn 1 giờ).
+  const originalUrlCache = useRef(new Map<string, string>());
+  // Trang ảnh đầu tiên được xin SONG SONG với bước kiểm tra liên kết: khi quyền
+  // được xác nhận, dữ liệu đã sẵn sàng — lưới chỉ còn chờ vẽ.
+  const firstPageRef = useRef<Promise<Paged<Photo> | null> | null>(null);
   const capabilities = useMemo(() => detectCapabilities(), []);
 
   const resolveAccess = useCallback(
@@ -81,8 +93,16 @@ export function SharedAlbumPage() {
 
   useEffect(() => {
     sharedUrlCache.current.clear();
+    sharedUrlPending.current.clear();
+    originalUrlCache.current.clear();
+    // Xin trang ảnh đầu NGAY (mật khẩu bỏ trống): liên kết công khai thường
+    // không có mật khẩu nên hai lời gọi chạy song song; nếu liên kết có mật
+    // khẩu, lời gọi này thất bại vô hại và fetchPage sẽ tự xin lại khi mở khoá.
+    firstPageRef.current = shareService
+      .listPhotos(shareToken, null, { cursor: null, limit: 400 })
+      .catch(() => null);
     void resolveAccess(null);
-  }, [resolveAccess]);
+  }, [resolveAccess, shareToken]);
 
   useEffect(
     () => () => {
@@ -91,19 +111,74 @@ export function SharedAlbumPage() {
         if (url.startsWith("blob:")) URL.revokeObjectURL(url);
       }
       sharedUrlCache.current.clear();
+      sharedUrlPending.current.clear();
+      originalUrlCache.current.clear();
     },
     [],
   );
 
-  const fetchPage = useCallback(
-    async (cursor: string | null) => {
-      const page = await shareService.listPhotos(shareToken, password || null, {
-        cursor,
-        limit: 60,
-      });
-      return { items: page.items, nextCursor: page.nextCursor, total: page.total };
+  /**
+   * Ký URL hiển thị cho cả TRANG ảnh theo lô — không chờ từng thẻ xin.
+   *
+   * Kho lưu trữ riêng tư ký mỗi ảnh một lượt; nếu để 351 thẻ cùng xin một lúc
+   * thì vượt rate limit 60 lời gọi/phút của Edge Function và phần lớn ảnh bị
+   * 429, lưới đứng lại giữa chừng. Kho (archive) ký từng ảnh ở phía Worker nên
+   * giữ lô 1 để vẫn chạy song song như trước.
+   */
+  const prefetchSharedThumbnails = useCallback(
+    (photos: Photo[]) => {
+      const cache = sharedUrlCache.current;
+      const pending = sharedUrlPending.current;
+      const chunkSize = isArchiveMode() ? 1 : 100;
+      const missing = photos.filter(
+        (photo) => !cache.has(`thumbnail:${photo.id}`) && !pending.has(`thumbnail:${photo.id}`),
+      );
+      for (let index = 0; index < missing.length; index += chunkSize) {
+        const chunk = missing.slice(index, index + chunkSize);
+        const batch = shareService
+          .resolveUrls(shareToken, password || null, chunk, "thumbnail")
+          .catch(() => ({}) as Record<string, string>);
+        for (const photo of chunk) {
+          const key = `thumbnail:${photo.id}`;
+          pending.set(key, batch.then((urls) => urls[photo.id] ?? null));
+        }
+        void batch.then((urls) => {
+          for (const photo of chunk) {
+            const key = `thumbnail:${photo.id}`;
+            const url = urls[photo.id];
+            pending.delete(key);
+            if (url) cache.set(key, url);
+          }
+        });
+      }
     },
     [password, shareToken],
+  );
+
+  const fetchPage = useCallback(
+    async (cursor: string | null) => {
+      let page: Paged<Photo>;
+      if (cursor === null && firstPageRef.current) {
+        // Trang đầu đã được xin song song với bước kiểm tra liên kết.
+        const preloaded = await firstPageRef.current;
+        firstPageRef.current = null;
+        page =
+          preloaded ??
+          (await shareService.listPhotos(shareToken, password || null, {
+            cursor: null,
+            limit: 400,
+          }));
+      } else {
+        page = await shareService.listPhotos(shareToken, password || null, {
+          cursor,
+          limit: 400,
+        });
+      }
+      // Ký URL theo lô NGAY khi có metadata; các thẻ ảnh chờ qua sharedUrlPending.
+      prefetchSharedThumbnails(page.items);
+      return { items: page.items, nextCursor: page.nextCursor, total: page.total };
+    },
+    [password, prefetchSharedThumbnails, shareToken],
   );
 
   const feed = usePhotoFeed({
@@ -113,13 +188,106 @@ export function SharedAlbumPage() {
     fetchPage: access ? fetchPage : undefined,
   });
 
+  /**
+   * Tải TOÀN BỘ danh sách ảnh ngay khi vào trang: cứ hết trang này sang trang
+   * khác cho tới khi hết — không cần người dùng kéo xuống tận đáy mới thấy đủ
+   * ảnh. Nhờ vậy lưới luôn có đủ dữ liệu và nút "Tải tất cả" không thiếu tệp.
+   */
+  useEffect(() => {
+    if (!access || !feed.hasMore || feed.loading || feed.loadingMore) return;
+    feed.loadMore();
+  }, [access, feed.hasMore, feed.loading, feed.loadingMore, feed.loadMore]);
+
   const selection = useSelection(feed.photos);
   const canDownload = access?.share.allowDownload ?? false;
 
   const downloadFlow = useDownloadFlow({
     title: access?.album.title ?? "cloude-album",
-    sourceFor: (photo) => shareService.getOriginalSource(shareToken, password || null, photo),
+    sourceFor: async (photo) => {
+      // Ưu tiên URL ảnh gốc đã ký trước theo lô: không tốn thêm một lời gọi
+      // Edge Function cho từng tệp (rate limit 60 lời gọi/phút).
+      const cached = originalUrlCache.current.get(photo.id);
+      if (cached) {
+        try {
+          const response = await fetch(cached);
+          if (response.ok) return await sourceFromResponse(response, photo.fileSize);
+        } catch {
+          // URL hết hạn hoặc mạng lỗi: rơi xuống cách ký lại từng ảnh bên dưới.
+        }
+      }
+      return shareService.getOriginalSource(shareToken, password || null, photo);
+    },
   });
+
+  const [gathering, setGathering] = useState(false);
+
+  /**
+   * Ký trước URL ảnh GỐC theo lô (100 ảnh/lời gọi) cho phiên tải xuống.
+   * Không ký trước thì mỗi tệp lại gọi Edge Function riêng và 351 tệp sẽ vượt
+   * rate limit 60 lời gọi/phút — phần lớn tệp lỗi giữa chừng.
+   */
+  const warmOriginalUrls = useCallback(
+    async (photos: Photo[]) => {
+      const cache = originalUrlCache.current;
+      const missing = photos.filter((photo) => !cache.has(photo.id));
+      for (let index = 0; index < missing.length; index += 100) {
+        const chunk = missing.slice(index, index + 100);
+        try {
+          const urls = await shareService.resolveUrls(
+            shareToken,
+            password || null,
+            chunk,
+            "original",
+          );
+          for (const [photoId, url] of Object.entries(urls)) cache.set(photoId, url);
+        } catch {
+          // Ký trước lỗi không được chặn luồng tải: từng ảnh sẽ ký lại khi cần.
+        }
+      }
+    },
+    [password, shareToken],
+  );
+
+  /**
+   * Bấm "Tải tất cả ảnh": gom ĐẦY ĐỦ danh sách (kể cả phần trang chưa tải về
+   * trang), ký trước URL ảnh gốc, rồi mở hộp thoại — không phụ thuộc việc người
+   * dùng có kéo tới cuối lưới hay không.
+   */
+  const handleDownloadAll = useCallback(async () => {
+    setGathering(true);
+    try {
+      const byId = new Map<string, Photo>();
+      for (const photo of feed.photos) byId.set(photo.id, photo);
+      // Con trỏ trỏ tới phần CHƯA tải: tải tiếp cho tới khi hết.
+      let cursor = feed.nextCursor;
+      while (cursor) {
+        const page = await shareService.listPhotos(shareToken, password || null, {
+          cursor,
+          limit: 400,
+        });
+        for (const photo of page.items) byId.set(photo.id, photo);
+        cursor = page.nextCursor;
+      }
+      const photos = [...byId.values()];
+      await warmOriginalUrls(photos);
+      downloadFlow.start(photos);
+    } catch (caught) {
+      toastError(caught);
+    } finally {
+      setGathering(false);
+    }
+  }, [downloadFlow, feed.nextCursor, feed.photos, password, shareToken, warmOriginalUrls]);
+
+  /** Tải nhóm ảnh đang chọn (thanh công cụ chọn ảnh) — cũng ký trước theo lô. */
+  const handleDownloadSelection = useCallback(async () => {
+    await warmOriginalUrls(selection.selectedPhotos);
+    downloadFlow.start(selection.selectedPhotos);
+  }, [downloadFlow, selection, warmOriginalUrls]);
+
+  const handleSelectionFolder = useCallback(async () => {
+    await warmOriginalUrls(selection.selectedPhotos);
+    await downloadFlow.pickFolderFor(selection.selectedPhotos);
+  }, [downloadFlow, selection, warmOriginalUrls]);
 
   /** Lấy URL hiển thị có chữ ký cho ảnh của khách (có cache trong phiên). */
   const sharedResolver: SrcResolver = useCallback(
@@ -127,6 +295,12 @@ export function SharedAlbumPage() {
       const key = `${purpose}:${photo.id}`;
       const cached = sharedUrlCache.current.get(key);
       if (cached) return { url: cached, release: () => undefined };
+      // Đang có lượt ký theo lô cho ảnh này: chờ chung, đừng xin thêm lượt riêng.
+      const pending = sharedUrlPending.current.get(key);
+      if (pending) {
+        const url = await pending;
+        if (url) return { url, release: () => undefined };
+      }
       const urls = await shareService.resolveUrls(
         shareToken,
         password || null,
@@ -244,10 +418,11 @@ export function SharedAlbumPage() {
           <div className="flex flex-wrap items-center gap-2">
             {canDownload ? (
               <Button
-                onClick={() => downloadFlow.start(feed.photos)}
-                disabled={feed.photos.length === 0}
+                onClick={() => void handleDownloadAll()}
+                loading={gathering}
+                disabled={feed.photos.length === 0 || gathering}
               >
-                Tải ảnh đang xem
+                Tải tất cả ảnh
               </Button>
             ) : (
               <span className="rounded-full bg-beige/70 px-3.5 py-2 text-[12.5px] text-ink-soft">
@@ -305,8 +480,8 @@ export function SharedAlbumPage() {
           isAllSelected={selection.isAllSelected}
           onSelectAll={selection.selectAll}
           onDeselectAll={selection.deselectAll}
-          onDownload={() => downloadFlow.start(selection.selectedPhotos)}
-          onChooseFolder={() => void downloadFlow.pickFolderFor(selection.selectedPhotos)}
+          onDownload={() => void handleDownloadSelection()}
+          onChooseFolder={() => void handleSelectionFolder()}
           canChooseFolder={downloadFlow.canChooseFolder}
         />
       ) : null}

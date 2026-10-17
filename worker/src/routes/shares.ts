@@ -239,7 +239,7 @@ export async function listSharePhotosRoute(ctx: PublicCtx, token: string): Promi
   }>(ctx.request).catch(() => ({}) as Record<string, never>);
 
   const { share } = await resolveShare(ctx, token, body.password ?? null);
-  const limit = pageLimit(body.limit ? String(body.limit) : null);
+  const limit = pageLimit(body.limit ? String(body.limit) : null, 400, 400);
   const sort = pickSort(body.sort ?? null, ["uploaded-desc", "uploaded-asc", "filename-asc"] as const, "uploaded-desc");
   const rows = await listPhotos(ctx.env.DB, share.album_id, {
     sort,
