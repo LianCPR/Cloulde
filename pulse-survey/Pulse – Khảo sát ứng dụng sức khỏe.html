@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8fbf7">
+<title>Pulse – Khảo sát ứng dụng sức khỏe</title>
+<meta name="description" content="Khảo sát ngắn về điều mọi người cần ở một ứng dụng sức khỏe: theo dõi vận động, giấc ngủ, AI và quyền riêng tư.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:title" content="Pulse – Bạn muốn một ứng dụng sức khỏe như thế nào?">
+<meta property="og:description" content="Khoảng 3–5 phút, không cần đăng nhập. Chia sẻ điều bạn thực sự cần ở một ứng dụng sức khỏe.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314683f'/%3E%3Cpath d='M6 17h5l2-6 4 12 2.5-6H26' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f8fbf7;--card:#fff;--mint:#e3f4ea;--green:#14683f;--green2:#0e4f30;--ink:#17261d;--mute:#5d6f64;--line:#d9e3dc;--err:#b3261e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:light}
+
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Be Vietnam Pro",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 56px}
+h1{font-size:clamp(2rem,6vw,3rem);line-height:1.15;margin:.4em 0 .3em;letter-spacing:-.02em}
+h2{font-size:1.35rem;margin:0}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--green)}
+.brand i{width:12px;height:12px;border-radius:50%;background:var(--green)}
+.pulse{width:100%;height:56px;margin:8px 0 4px}
+.pulse path{fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:600;stroke-dashoffset:600;animation:draw 2.4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.pulse path{animation:none;stroke-dashoffset:0}*{transition:none!important}}
+.lead{color:var(--mute);max-width:60ch}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0;padding:0;list-style:none}
+.facts li{background:var(--mint);border-radius:999px;padding:6px 14px;font-size:.9rem}
+.btn{font:inherit;font-weight:600;border:0;border-radius:14px;padding:13px 24px;cursor:pointer;background:var(--green);color:#fff}
+
+
+.btn.ghost{background:transparent;color:var(--green);border:1.5px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.note{font-size:.85rem;color:var(--mute);margin-top:18px}
+.bar{height:8px;background:var(--mint);border-radius:99px;overflow:hidden;margin:10px 0 6px}
+.bar div{height:100%;background:var(--green);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.85rem;color:var(--mute)}
+.sec{display:flex;gap:12px;align-items:center;margin:22px 0 8px}
+.ico{width:46px;height:46px;border-radius:14px;background:var(--mint);display:grid;place-items:center;font-size:1.4rem}
+fieldset{border:0;margin:0 0 18px;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:20px}
+legend{font-weight:600;padding:0 6px;float:left;width:100%;margin-bottom:10px;font-size:1.02rem}
+legend+*{clear:both}
+.hint{font-size:.82rem;color:var(--mute);font-weight:400;display:block}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;margin:7px 0;border:1.5px solid var(--line);border-radius:14px;cursor:pointer;transition:background .15s,border-color .15s}
+.opt:hover{border-color:var(--green)}
+.opt input{margin-top:4px;accent-color:var(--green);width:18px;height:18px;flex:none}
+.opt:has(input:checked){background:var(--mint);border-color:var(--green)}
+.opt:has(input:focus-visible){outline:3px solid var(--green);outline-offset:2px}
+.other,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:6px}
+textarea{min-height:110px;resize:vertical}
+.warn{color:var(--err);font-size:.85rem;min-height:1.2em}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:8px}
+.banner{background:var(--mint);border:1.5px solid var(--green);border-radius:14px;padding:12px 16px;margin:14px 0;font-size:.92rem}
+.hp{position:absolute;left:-9999px}
+
+/* ===== ANIMATION ===== */
+body{overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+main{position:relative;z-index:1}
+.blob{position:fixed;z-index:0;border-radius:50%;filter:blur(70px);opacity:.55;pointer-events:none;will-change:transform}
+.b1{width:340px;height:340px;background:#bfe9d0;top:-100px;left:-90px;animation:fl1 16s ease-in-out infinite alternate}
+.b2{width:300px;height:300px;background:#d6f3e2;bottom:-80px;right:-70px;animation:fl2 19s ease-in-out infinite alternate}
+.b3{width:220px;height:220px;background:#e6f7c9;top:42%;right:12%;opacity:.4;animation:fl1 22s ease-in-out infinite alternate-reverse}
+@keyframes fl1{to{transform:translate(90px,120px) scale(1.2)}}
+@keyframes fl2{to{transform:translate(-110px,-90px) scale(1.15)}}
+@keyframes rise{from{opacity:0;transform:translateY(26px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.97)}50%{transform:scale(1.025)}100%{transform:scale(1)}}
+@keyframes beat{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(20,104,63,.45)}40%{transform:scale(1.35);box-shadow:0 0 0 9px rgba(20,104,63,0)}}
+@keyframes shine{to{background-position:200% 0}}
+@keyframes fall{0%{transform:translate3d(0,-20px,0) rotate(0);opacity:1}100%{transform:translate3d(var(--x),105vh,0) rotate(var(--r));opacity:.9}}
+#app>*{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+#app>*:nth-child(2){animation-delay:.06s}#app>*:nth-child(3){animation-delay:.12s}#app>*:nth-child(4){animation-delay:.18s}#app>*:nth-child(5){animation-delay:.24s}#app>*:nth-child(6){animation-delay:.3s}#app>*:nth-child(n+7){animation-delay:.36s}
+#app>fieldset{animation-delay:calc(var(--d,0)*90ms + .15s)}
+.brand i{animation:beat 1.4s ease-in-out infinite}
+h1{background:linear-gradient(100deg,var(--ink) 30%,var(--green) 50%,var(--ink) 70%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rise .6s both,shine 6s linear infinite}
+.pulse path{animation:draw 3s ease-in-out infinite}
+.facts li{animation:rise .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*80ms + .35s)}
+.opt{animation:rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*40ms + .25s);transition:background .25s,border-color .25s,transform .2s,box-shadow .25s}
+.opt:hover{transform:translateX(4px);box-shadow:0 6px 18px rgba(20,104,63,.1)}
+.opt:active{transform:scale(.985)}
+.opt:has(input:checked){animation:rise .5s both,pop .35s .0s;box-shadow:0 6px 20px rgba(20,104,63,.14)}
+fieldset{transition:box-shadow .3s,transform .3s}
+fieldset:focus-within{box-shadow:0 10px 30px rgba(20,104,63,.12);transform:translateY(-2px)}
+.btn{transition:transform .2s,box-shadow .25s,background .2s;box-shadow:0 6px 16px rgba(20,104,63,.25)}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 24px rgba(20,104,63,.3)}
+.btn:active:not(:disabled){transform:scale(.96)}
+.btn.ghost{box-shadow:none}
+.bar div{transition:width .8s cubic-bezier(.2,.8,.2,1);background:linear-gradient(90deg,var(--green),#4cc58a)}
+.otherwrap{animation:rise .35s both}
+.conf{position:fixed;top:0;width:10px;height:14px;border-radius:3px;z-index:5;pointer-events:none;animation:fall 2.8s cubic-bezier(.3,.6,.4,1) forwards}
+@media (max-width:600px){main{padding:16px 12px 40px}fieldset{padding:14px}.nav{position:sticky;bottom:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 35%);z-index:3}.btn{flex:1}.opt{padding:13px 14px}}
+@media (min-width:900px){main{max-width:760px;padding-top:48px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}h1{color:var(--ink);background:none}}
+.ico{width:52px;height:52px;flex:none;border-radius:16px;background:linear-gradient(145deg,#eaf8f0,#c6ebd6);color:var(--green);box-shadow:inset 0 0 0 1.5px rgba(20,104,63,.14),0 8px 18px rgba(20,104,63,.14)}
+.ico svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ico svg *{stroke-dasharray:90;stroke-dashoffset:90;animation:draw2 1s .25s cubic-bezier(.4,0,.2,1) forwards}
+.ico.big{width:76px;height:76px;border-radius:24px;margin:24px 0 8px}.ico.big svg{width:38px;height:38px}
+.ico.big svg *{fill:rgba(20,104,63,.12)}
+@keyframes draw2{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.ico svg *{stroke-dashoffset:0}}
+/* ===== LÀM LẠI CONTROL + GIAO DIỆN ===== */
+body{background:radial-gradient(1200px 600px at 10% -10%,#e4f6ec,transparent 60%),radial-gradient(900px 500px at 100% 110%,#dff3e8,transparent 60%),radial-gradient(#cfe3d6 1px,transparent 1.3px) 0 0/26px 26px,var(--bg);background-attachment:fixed}
+fieldset{background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(20,104,63,.12);border-radius:26px;padding:22px 20px;box-shadow:0 10px 34px rgba(20,104,63,.07);position:relative;overflow:hidden}
+fieldset::before{content:"";position:absolute;left:0;top:0;height:4px;width:0;background:linear-gradient(90deg,var(--green),#6fd6a2);border-radius:0 4px 4px 0;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+fieldset:focus-within::before,fieldset:hover::before{width:100%}
+legend{font-size:1.1rem;line-height:1.4;margin-bottom:14px}
+.hint{margin-top:3px}
+.opt{position:relative;overflow:hidden;border:1.5px solid #dbe8e0;border-radius:18px;background:#fff;padding:14px 16px;gap:14px;align-items:center;margin:9px 0}
+.opt::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(111,214,162,.28) 50%,transparent 70%);transform:translateX(-120%);transition:transform .7s}
+.opt:hover::after{transform:translateX(120%)}
+.opt span{position:relative;z-index:1}
+.opt:has(input:checked){background:linear-gradient(135deg,#e9f8ef,#d3f0e0);border-color:var(--green);box-shadow:0 8px 22px rgba(20,104,63,.16),inset 4px 0 0 var(--green);font-weight:500}
+.opt input{-webkit-appearance:none;appearance:none;width:26px;height:26px;margin:0;flex:none;border:2px solid #aac7b6;border-radius:9px;background:#fff center/0 no-repeat;transition:background-color .25s,border-color .25s,box-shadow .25s,transform .25s;position:relative;z-index:1}
+.opt input[type=radio]{border-radius:50%}
+.opt:hover input{border-color:var(--green);box-shadow:0 0 0 5px rgba(20,104,63,.1)}
+.opt input[type=checkbox]:checked{background-color:var(--green);border-color:var(--green);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");background-size:17px;animation:tick .4s cubic-bezier(.3,1.6,.5,1)}
+.opt input[type=radio]:checked{border-color:var(--green);background-image:radial-gradient(circle,var(--green) 0 46%,#fff 50%);animation:tick .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes tick{0%{transform:scale(.5)}100%{transform:scale(1)}}
+.btn{border-radius:16px;padding:14px 28px;background:linear-gradient(135deg,#1a8553,#14683f);position:relative;overflow:hidden}
+.btn.ghost{background:rgba(255,255,255,.7);border:1.5px solid #cfe0d6}
+.btn:not(.ghost)::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);transform:translateX(-130%);animation:sweep 3.2s 1s infinite}
+@keyframes sweep{to{transform:translateX(130%)}}
+.bar{height:10px;box-shadow:inset 0 1px 3px rgba(20,104,63,.15)}
+.bar div{box-shadow:0 0 12px rgba(76,197,138,.7);position:relative}
+.sec{margin:26px 0 14px}.sec h2{font-size:1.5rem;letter-spacing:-.01em}
+.conf{z-index:60}
+.ov{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:rgba(14,40,26,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);perspective:1400px;animation:fade .5s both;overflow:auto}
+.ov.out{animation:fade .45s reverse both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.gc{position:relative;width:min(460px,100%);text-align:center;padding:30px 26px 26px;border-radius:28px;background:linear-gradient(160deg,#fffdf6,#f1fbf5 60%,#e3f5ea);border:1.5px solid rgba(20,104,63,.2);box-shadow:0 30px 80px rgba(8,40,22,.4),inset 0 0 0 7px rgba(255,255,255,.7),inset 0 0 0 8px rgba(20,104,63,.12);transform-origin:left center;animation:cardopen 1.2s cubic-bezier(.2,.9,.25,1) both}
+.ov.out .gc{animation:cardout .45s ease both}
+@keyframes cardopen{0%{opacity:0;transform:rotateY(-105deg) scale(.55)}60%{opacity:1;transform:rotateY(8deg) scale(1.03)}100%{opacity:1;transform:none}}
+@keyframes cardout{to{opacity:0;transform:translateY(30px) scale(.9)}}
+.gc .ico.big{margin:6px auto 12px;animation:beat 1.6s 1.2s infinite}
+.gt{font-size:1.7rem;margin:0 0 10px;letter-spacing:-.01em;color:var(--green2)}
+.gl,.gs{margin:8px auto;max-width:34ch;color:var(--mute)}
+.gs{color:var(--green);font-weight:600;margin-top:16px}
+.gt,.gl,.gs,.gc .nav{opacity:0;animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+.gt{animation-delay:.9s}.gl:nth-of-type(1){animation-delay:1.1s}.gl:nth-of-type(2){animation-delay:1.3s}.gs{animation-delay:1.5s}.gc .nav{animation-delay:1.7s}
+.gc .nav{position:static;background:none;padding:0;justify-content:center;margin-top:18px}.gc .nav .btn{flex:0 1 150px}
+.st{position:absolute;width:22px;height:22px;color:#4cc58a;animation:twinkle 2.6s ease-in-out infinite}
+.st svg{width:100%;height:100%;fill:currentColor;stroke:none}.st svg *{stroke-dasharray:none!important;stroke-dashoffset:0!important;animation:none!important}
+.s1{top:16px;left:18px}.s2{top:38px;right:22px;animation-delay:.6s}.s3{bottom:80px;left:26px;animation-delay:1.1s}.s4{bottom:110px;right:18px;animation-delay:1.6s}
+@keyframes twinkle{0%,100%{transform:scale(.5) rotate(0);opacity:.3}50%{transform:scale(1.15) rotate(25deg);opacity:1}}
+@media (prefers-reduced-motion:reduce){.gt,.gl,.gs,.gc .nav{opacity:1}.ov,.gc{opacity:1}}
+/* ===== THÔNG TIN NGƯỜI THAM GIA ===== */
+.idcard{background:var(--card);border:1px solid rgba(20,104,63,.12);border-radius:22px;padding:18px 20px;margin:18px 0 4px;box-shadow:0 8px 24px rgba(20,104,63,.06)}
+.idcard h3{font-size:.95rem;margin:0 0 10px;color:var(--green);letter-spacing:.01em}
+.idfield{display:block;margin:0 0 12px}
+.idfield span{display:block;font-size:.86rem;color:var(--mute)}
+.idfield b{color:var(--green);font-weight:600}
+.idfield input{display:block;width:100%;margin-top:6px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;transition:border-color .2s,box-shadow .2s}
+.idfield input:focus{border-color:var(--green);outline:3px solid rgba(20,104,63,.15);outline-offset:0}
+.idfield input[aria-invalid="true"]{border-color:var(--err)}
+.idnote{font-size:.78rem;color:var(--mute);margin:2px 0 0;line-height:1.45}
+.idcard .warn{min-height:0;margin:8px 0 0}
+/* Tạm dừng animation nền khi tab bị ẩn để tiết kiệm pin. */
+body.is-idle .blob,body.is-idle .brand i,body.is-idle .pulse path,body.is-idle h1,body.is-idle .btn::after{animation-play-state:paused!important}
+@media (max-width:600px){.idcard{padding:15px 16px}}
+
+/* ===== POLISH: hệ thống bo góc, bỏ hiệu ứng trang trí ===== */
+:root{
+  --radius-card:20px;--radius-opt:12px;--radius-control:7px;
+  --shadow-card:0 1px 2px rgba(15,40,25,.03),0 18px 40px -32px rgba(15,40,25,.3);
+}
+body{background:linear-gradient(180deg,#fbfdf9 0%,#f7faf6 280px,#f7faf6 100%);min-height:100vh;display:flex;flex-direction:column}
+main{flex:1 0 auto;width:100%;padding-bottom:40px}
+.blob{display:none}
+h1{background:none;-webkit-text-fill-color:currentColor;color:var(--ink);font-size:clamp(1.9rem,5.2vw,2.7rem);letter-spacing:-.035em;line-height:1.12;animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.brand{letter-spacing:-.01em}
+.brand i{animation:none;box-shadow:0 0 0 4px rgba(20,104,63,.08)}
+.pulse{height:40px;max-width:300px;margin:14px 0 6px}
+.pulse path{stroke-width:2.4;animation:draw 1.6s ease .1s forwards}
+.lead{max-width:58ch;margin:0 0 10px}
+.facts{gap:6px;margin:18px 0 22px}
+.facts li{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.82rem;color:var(--mute);animation:rise .4s both;animation-delay:calc(var(--i,0)*50ms + .15s)}
+.idcard{border-radius:16px;border:1px solid var(--line);box-shadow:none;padding:18px;margin:20px 0 14px;background:#fff}
+.idcard h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.09em;color:var(--mute);font-weight:600;margin-bottom:12px}
+.idfield span{font-size:.85rem}
+.idfield input{border-radius:9px;background:#fff;border:1px solid var(--line);padding:11px 12px}
+.idfield input:focus{border-color:var(--green);outline:3px solid rgba(20,104,63,.12)}
+.idnote{font-size:.79rem;line-height:1.55}
+.btn{border-radius:11px;background:var(--green);box-shadow:none;padding:13px 22px;font-weight:600}
+.btn:hover:not(:disabled){transform:none;background:var(--green2);box-shadow:0 6px 16px rgba(20,104,63,.16)}
+.btn:active:not(:disabled){transform:none}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--green)}
+.btn.ghost:hover:not(:disabled){background:#f1f8f3;border-color:#bfd6c8}
+.btn:not(.ghost)::after{display:none}
+.btn.start{width:100%;margin-top:4px}
+.note{font-size:.8rem;line-height:1.6;margin-top:20px;max-width:70ch}
+fieldset{border-radius:var(--radius-card);padding:20px 18px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-card);-webkit-backdrop-filter:none;backdrop-filter:none}
+fieldset::before{display:none}
+fieldset:focus-within{transform:none;box-shadow:0 0 0 3px rgba(20,104,63,.07),0 1px 2px rgba(15,40,25,.03);border-color:#b9d4c4}
+legend{float:none;width:auto;padding:0;display:block;font-size:1.02rem;line-height:1.45;margin:0 0 12px;font-weight:600}
+legend+*{clear:none}
+.hint{font-size:.79rem;color:var(--mute);font-weight:400;margin-top:4px;display:block;letter-spacing:.01em}
+.qnote{font-size:.79rem;line-height:1.55;color:var(--mute);background:#f7faf7;border-radius:8px;padding:8px 10px;margin:0 0 12px}
+.opt{border:1.5px solid var(--line);border-radius:var(--radius-opt);padding:13px 14px;margin:8px 0;background:#fff;gap:12px;align-items:center;animation:none}
+.opt::after{display:none}
+.opt:hover{transform:none;box-shadow:none;border-color:#a9c8b5;background:#fcfefc}
+.opt:has(input:checked){background:#eef8f2;border-color:var(--green);box-shadow:none;animation:none}
+.opt input{width:22px;height:22px;border-radius:var(--radius-control);border:1.5px solid #a9c3b3;background-color:#fff;background-position:center;background-size:14px;background-repeat:no-repeat;margin:0;transition:background-color .18s,border-color .18s,box-shadow .18s}
+.opt input[type=radio]{border-radius:var(--radius-control)}
+.opt:hover input{border-color:var(--green);box-shadow:0 0 0 4px rgba(20,104,63,.08)}
+.opt input[type=checkbox]:checked,.opt input[type=radio]:checked{background-color:var(--green);border-color:var(--green);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");background-size:14px;animation:tick .22s ease}
+.opt span{font-size:.95rem;line-height:1.45}
+.other,textarea{border-radius:9px;background:#fff;border:1px solid var(--line);padding:10px 12px}
+.other:focus,textarea:focus{border-color:var(--green);outline:3px solid rgba(20,104,63,.12)}
+.warn{font-size:.8rem}
+.banner{border-radius:10px;background:#f1f8f3;border:1px solid #cfe4d6;padding:12px 14px}
+.bar{height:6px;background:#e7efe9;box-shadow:none;margin:10px 0 8px}
+.bar div{background:var(--green);box-shadow:none;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.meta{font-size:.8rem;letter-spacing:.01em}
+.sec{margin:28px 0 14px;gap:10px}
+.sec h2{font-size:1.32rem;letter-spacing:-.02em}
+.ico{width:42px;height:42px;border-radius:11px;background:var(--mint);box-shadow:none;border:1px solid #d8e9de}
+.ico svg{width:22px;height:22px}
+.ico svg *{animation:none;stroke-dashoffset:0}
+.ico.big{width:64px;height:64px;border-radius:18px;margin:4px auto 14px}
+.ico.big svg{width:30px;height:30px}
+.nav{gap:10px}
+.ov{background:rgba(17,35,25,.42);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);opacity:1;transition:opacity .2s;animation:none}
+.ov.out{opacity:0;animation:none}
+.gc{border-radius:20px;background:#fff;border:1px solid var(--line);box-shadow:0 30px 70px -20px rgba(8,30,18,.35);padding:28px 24px 24px;animation:cardin .28s cubic-bezier(.2,.8,.2,1) both;transform-origin:center}
+@keyframes cardin{from{transform:translateY(8px)}to{transform:none}}
+.gc .ico.big{animation:none}
+.gt{font-size:1.45rem;letter-spacing:-.02em;color:var(--ink)}
+.gl,.gs{font-size:.93rem;line-height:1.6}
+.gs{font-size:.9rem;margin-top:18px}
+.st{display:none}
+.gt,.gl,.gs,.gc .nav{animation:none;opacity:1}
+.gc .nav{margin-top:20px}
+.conf{display:none}
+.site-foot{width:100%;max-width:760px;margin:0 auto;padding:22px 16px 34px;color:var(--mute);font-size:.8rem}
+.foot-in{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px}
+.foot-brand{margin:0;line-height:1.5}
+.foot-brand strong{color:var(--ink);font-size:.9rem;letter-spacing:-.01em}
+.foot-brand span{display:block;font-size:.76rem;color:var(--mute);margin-top:2px}
+.foot-contact{display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+.foot-by{font-size:.76rem;color:var(--mute)}
+.foot-by strong{color:var(--ink);font-weight:600}
+.foot-links{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.foot-links a{display:inline-flex;align-items:center;gap:6px;color:var(--mute);text-decoration:none;padding:3px 0;transition:color .15s}
+.foot-links a:hover{color:var(--green)}
+.foot-links svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.foot-bottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;font-size:.74rem;color:#7a8a7e}
+@media (max-width:600px){.site-foot{padding:18px 12px 28px}.foot-in{flex-direction:column;gap:12px}.foot-links{gap:16px}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<footer class="site-foot">
+  <div class="foot-in">
+    <p class="foot-brand"><strong>Pulse</strong><span>Khảo sát nghiên cứu sản phẩm sức khỏe</span></p>
+    <div class="foot-contact">
+      <span class="foot-by">Làm bởi <strong>Đăng</strong></span>
+      <nav class="foot-links" aria-label="Liên hệ với Đăng">
+        <a href="https://www.instagram.com/4ang_d/" target="_blank" rel="noopener noreferrer" aria-label="Instagram của Đăng">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".8" fill="currentColor" stroke="none"/></svg>Instagram
+        </a>
+        <a href="mailto:koishykana@gmail.com" aria-label="Gửi email cho Đăng">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4 7l8 6 8-6"/></svg>Gmail
+        </a>
+        <a href="https://www.facebook.com/ethprr" target="_blank" rel="noopener noreferrer" aria-label="Facebook của Đăng">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M13.6 16.5v-5h1.8l.3-2h-2.1V8.2c0-.6.2-.9.9-.9h1.3V5.6h-1.7c-1.6 0-2.5.9-2.5 2.5v1.4H9.8v2h1.8v5"/></svg>Facebook
+        </a>
+      </nav>
+    </div>
+  </div>
+  <div class="foot-bottom"><span>© 2026 Pulse</span><span>Khảo sát không phải tư vấn y tế.</span></div>
+</footer>
+<script>
+/* ===== CẤU HÌNH TRIỂN KHAI ===== */
+const CONFIG={
+  endpoint:"https://lgbygyoiszechuxtknty.supabase.co/functions/v1/submit-survey", // Edge Function Supabase. Để trống = chế độ thử nghiệm, KHÔNG lưu dữ liệu.
+  retention:"6 tháng kể từ ngày gửi",
+  purpose:"Câu trả lời, tên và liên kết MXH (nếu bạn cung cấp) chỉ dùng để nghiên cứu nhu cầu cho ứng dụng Pulse."
+};
+/* ===== DỮ LIỆU CÂU HỎI (tách khỏi giao diện) ===== */
+const SECTIONS=[
+ {n:"Thiết bị và thói quen",i:"📱",q:[1,2,3,4,5]},
+ {n:"Nhu cầu theo dõi sức khỏe",i:"💓",q:[6,7,8,9,10,11]},
+ {n:"Tính năng mong muốn",i:"🧩",q:[12,13,14,15,16]},
+ {n:"AI và cá nhân hóa",i:"✨",q:[17,18,19,20,21]},
+ {n:"Giao diện và trải nghiệm",i:"🎨",q:[22,23,24,25]},
+ {n:"Quyền riêng tư và dữ liệu",i:"🔒",q:[26,27,28,29,30]},
+ {n:"Mức độ quan tâm và góp ý",i:"💬",q:[31,32,33,34,35]}
+];
+const DATA6=["Số bước đi mỗi ngày","Quãng đường di chuyển","Thời gian vận động","Năng lượng hoạt động","Nhịp tim","Giấc ngủ và thời lượng ngủ","Các giai đoạn ngủ nếu thiết bị hỗ trợ","Lịch sử tập luyện","Thời gian nghỉ ngơi và phục hồi","Cân nặng và các chỉ số cơ thể do người dùng cung cấp","Dữ liệu sức khỏe khác có sẵn từ thiết bị tương thích"];
+// kiểu: s = chọn một, m = chọn nhiều, số = tối đa N lựa chọn, t = văn bản
+const Q={
+1:["Bạn hiện đang sử dụng thiết bị nào?","m",["iPhone","Điện thoại Android","Apple Watch","Đồng hồ thông minh của hãng khác","Vòng đeo tay theo dõi sức khỏe","Máy tính hoặc laptop","Chỉ sử dụng điện thoại, không có thiết bị đeo","Khác"]],
+2:["Bạn đã từng sử dụng ứng dụng theo dõi sức khỏe chưa?","s",["Đang sử dụng thường xuyên","Có sử dụng nhưng không thường xuyên","Đã từng sử dụng, hiện không còn dùng","Chưa từng sử dụng","Không biết có những ứng dụng như vậy"]],
+3:["Bạn thường sử dụng những ứng dụng nào liên quan đến sức khỏe?","m",["Apple Health","Ứng dụng sức khỏe có sẵn trên Android","Ứng dụng theo dõi tập luyện","Ứng dụng theo dõi giấc ngủ","Ứng dụng theo dõi dinh dưỡng","Ứng dụng của đồng hồ thông minh","Ứng dụng ghi chép lịch tập gym","Chưa sử dụng ứng dụng nào","Khác"]],
+4:["Bạn thường quan tâm đến sức khỏe ở mức độ nào?","s",["Rất quan tâm và thường xuyên theo dõi","Khá quan tâm, đôi khi kiểm tra các chỉ số","Chỉ quan tâm khi muốn thay đổi thói quen","Chỉ quan tâm khi có vấn đề cần chú ý","Chưa thực sự quan tâm đến việc theo dõi sức khỏe"]],
+5:["Bạn thường sử dụng ứng dụng sức khỏe vào thời điểm nào?","m",["Buổi sáng sau khi thức dậy","Trong ngày để xem hoạt động","Trước hoặc sau khi tập luyện","Buổi tối trước khi ngủ","Cuối tuần để xem thống kê","Chỉ mở khi có thông báo","Không có thời gian sử dụng cố định"]],
+6:["Bạn muốn theo dõi những dữ liệu nào?","m",[...DATA6,"Tôi chưa biết mình cần theo dõi gì","Khác"]],
+7:["Trong những dữ liệu trên, đâu là điều bạn quan tâm nhất?",3,"@6"],
+8:["Bạn muốn xem dữ liệu sức khỏe theo cách nào?","s",["Xem nhanh toàn bộ trong một màn hình","Xem từng chỉ số riêng biệt","Xem biểu đồ theo ngày, tuần và tháng","Xem báo cáo tổng hợp theo tuần","Xem báo cáo tổng hợp theo tháng","Kết hợp dashboard và báo cáo chi tiết"]],
+9:["Bạn có muốn so sánh dữ liệu giữa các ngày không?","s",["Có, muốn so sánh hằng ngày","Có, chủ yếu theo dõi theo tuần","Có, muốn xem xu hướng theo tháng","Chỉ muốn xem số liệu hiện tại","Không có nhu cầu này"]],
+10:["Điều gì khiến bạn khó theo dõi sức khỏe bằng các ứng dụng hiện nay?","m",["Có quá nhiều số liệu, khó hiểu","Dữ liệu nằm ở nhiều ứng dụng khác nhau","Giao diện phức tạp","Biểu đồ khó đọc","Không biết nên chú ý đến chỉ số nào","Thiếu phân tích xu hướng","Thiếu gợi ý phù hợp với cá nhân","Lo ngại về quyền riêng tư","Tốn phí cho tính năng cần thiết","Tôi chưa gặp khó khăn đáng kể","Chưa từng sử dụng ứng dụng sức khỏe","Khác"]],
+11:["Bạn muốn dữ liệu được cập nhật như thế nào?","s",["Tự động cập nhật khi có dữ liệu mới","Đồng bộ vài lần trong ngày là đủ","Chỉ cần cập nhật khi mở ứng dụng","Muốn tự chọn thời điểm đồng bộ","Chưa có ý kiến"],"Đây là mong muốn về trải nghiệm, không cam kết mọi nền tảng đều cho phép đồng bộ tức thời."],
+12:["Nếu chỉ được chọn 3 tính năng quan trọng nhất, bạn sẽ chọn gì?",3,["Dashboard tổng hợp sức khỏe","Theo dõi giấc ngủ","Theo dõi vận động hằng ngày","Theo dõi nhịp tim và chỉ số có sẵn","Theo dõi tập gym","Theo dõi phục hồi sau tập","AI phân tích dữ liệu cá nhân","Báo cáo sức khỏe theo tuần và tháng","Nhắc nhở vận động hoặc nghỉ ngơi","Tự động đồng bộ dữ liệu từ các nền tảng tương thích","Nhật ký sức khỏe cá nhân","Tùy chỉnh giao diện và chỉ số yêu thích"]],
+13:["Bạn muốn ứng dụng có dashboard như thế nào?","s",["Tối giản, chỉ hiển thị những thông tin quan trọng","Nhiều biểu đồ và chỉ số chi tiết","Tùy chỉnh hoàn toàn theo nhu cầu","Có một màn hình tổng quan và các trang chi tiết","Chưa có ý tưởng cụ thể"]],
+14:["Bạn có muốn nhận báo cáo sức khỏe định kỳ không?","s",["Có, báo cáo hằng ngày","Có, báo cáo hằng tuần","Có, báo cáo hằng tháng","Chỉ muốn xem khi cần","Không cần báo cáo tự động"]],
+15:["Bạn có muốn đặt mục tiêu cá nhân không?","s",["Có, muốn tự đặt mục tiêu","Có, muốn ứng dụng đề xuất mục tiêu phù hợp","Muốn có cả mục tiêu tự đặt và gợi ý","Chỉ muốn theo dõi số liệu, không đặt mục tiêu","Chưa biết"]],
+16:["Bạn thích kiểu thông báo nào?","m",["Nhắc vận động nhẹ nhàng","Nhắc giờ ngủ theo lịch cá nhân","Nhắc xem báo cáo định kỳ","Nhắc kiểm tra mục tiêu","Chỉ thông báo những thay đổi đáng chú ý","Cho phép tùy chỉnh toàn bộ thông báo","Không muốn nhận thông báo","Khác"]],
+17:["Bạn cảm thấy thế nào về tính năng AI trong ứng dụng sức khỏe?","s",["Rất hứng thú, muốn trải nghiệm","Khá quan tâm nếu tính năng hữu ích","Bình thường, có cũng được","Hơi lo ngại về độ chính xác","Không có nhu cầu sử dụng AI"]],
+18:["Bạn muốn AI giúp mình điều gì?","m",["Giải thích các chỉ số sức khỏe bằng ngôn ngữ dễ hiểu","Phân tích xu hướng vận động","Tóm tắt dữ liệu giấc ngủ","Hỗ trợ theo dõi tập luyện và phục hồi","Đề xuất thói quen lành mạnh","Tạo báo cáo cá nhân theo tuần","Trả lời câu hỏi về cách sử dụng ứng dụng","Giúp phát hiện những thay đổi đáng chú ý trong dữ liệu","Không muốn sử dụng AI","Khác"]],
+19:["Bạn thích AI trình bày kết quả theo cách nào?","s",["Ngắn gọn, dễ hiểu, chỉ nêu ý chính","Giải thích chi tiết kèm biểu đồ","Có cả tóm tắt và phần giải thích mở rộng","Hỏi đáp trực tiếp như trò chuyện với trợ lý","Không có nhu cầu này"]],
+20:["Bạn mong muốn mức độ cá nhân hóa ra sao?","s",["Gợi ý dựa trên dữ liệu và thói quen của riêng tôi","Gợi ý chung, dễ áp dụng cho mọi người","Tôi muốn tự tùy chỉnh các gợi ý","Tôi chỉ cần xem dữ liệu, không cần gợi ý","Chưa biết"]],
+21:["Điều gì khiến bạn tin tưởng một gợi ý do AI đưa ra?","m",["Giải thích rõ lý do đưa ra gợi ý","Dựa trên dữ liệu thực tế của tôi","Nêu rõ giới hạn và mức độ không chắc chắn","Có nguồn tham khảo đáng tin cậy","Không đưa ra kết luận chẩn đoán bệnh","Cho phép tôi tắt AI bất cứ lúc nào","Tôi chưa tin tưởng AI trong lĩnh vực sức khỏe","Khác"]],
+22:["Bạn thích phong cách giao diện nào nhất?","s",["Trắng, xanh mint, nhẹ nhàng","Tối giản cao cấp kiểu Apple","Dark mode, đen và xanh neon","Nhiều màu sắc, sinh động","Chuyên nghiệp, thiên về dữ liệu và biểu đồ","Cho phép đổi giao diện tùy ý"]],
+23:["Bạn thích cách hiển thị thông tin nào?","m",["Các thẻ thông tin nhỏ","Biểu đồ đường","Biểu đồ cột","Vòng tròn tiến độ mục tiêu","Lịch theo dõi","Báo cáo bằng văn bản","Biểu tượng minh họa trực quan","Kết hợp nhiều dạng hiển thị"]],
+24:["Bạn muốn thao tác sử dụng ứng dụng như thế nào?","s",["Càng đơn giản càng tốt, mở lên là hiểu","Có nhiều tùy chỉnh cho người dùng nâng cao","Đơn giản ở trang chính, chi tiết ở trang phụ","Có hướng dẫn sử dụng từng bước","Chưa có ý kiến"]],
+25:["Bạn thường sử dụng ngôn ngữ nào trong ứng dụng?","s",["Tiếng Việt","Tiếng Anh","Muốn có thể chuyển đổi giữa nhiều ngôn ngữ","Không quan trọng"]],
+26:["Bạn cảm thấy thế nào khi ứng dụng đọc dữ liệu từ Apple Health hoặc nền tảng sức khỏe tương thích?","s",["Hoàn toàn thoải mái nếu tôi tự cấp quyền","Đồng ý nếu biết rõ ứng dụng đọc dữ liệu gì","Chỉ đồng ý với một số loại dữ liệu","Khá lo ngại về quyền riêng tư","Không muốn kết nối dữ liệu từ ứng dụng khác","Chưa biết"]],
+27:["Bạn thích cách lưu dữ liệu nào nhất?","s",["Chỉ lưu trên thiết bị cá nhân","Lưu trên đám mây để đồng bộ nhiều thiết bị","Kết hợp lưu trữ trên thiết bị và đám mây","Muốn được lựa chọn giữa các phương án","Chưa có ý kiến"]],
+28:["Những yếu tố bảo mật nào quan trọng với bạn?","m",["Chỉ đọc dữ liệu khi được cấp quyền","Giải thích rõ dữ liệu nào được thu thập","Không bán dữ liệu sức khỏe cho bên thứ ba","Mã hóa dữ liệu","Cho phép thu hồi quyền truy cập","Cho phép xuất hoặc xóa dữ liệu","Không sử dụng dữ liệu sức khỏe cho quảng cáo","Có chính sách quyền riêng tư rõ ràng","Tất cả những điều trên","Khác"]],
+29:["Bạn có muốn sử dụng ứng dụng mà không cần tạo tài khoản không?","s",["Có, muốn dùng ngay mà không đăng ký","Muốn có tài khoản để đồng bộ dữ liệu","Muốn được chọn giữa hai cách","Không quan trọng"]],
+30:["Điều gì có thể khiến bạn không muốn sử dụng ứng dụng?","m",["Thu thập quá nhiều dữ liệu","Không rõ dữ liệu được lưu ở đâu","Bắt buộc đăng ký tài khoản","Giao diện khó sử dụng","Quảng cáo quá nhiều","Bắt buộc trả phí cho tính năng cơ bản","Tốn pin hoặc làm thiết bị chậm","Gợi ý AI không đáng tin cậy","Không có tính năng tôi cần","Không có điều gì đáng lo ngại nếu ứng dụng hoạt động tốt","Khác"]],
+31:["Nếu ứng dụng đáp ứng được nhu cầu của bạn, bạn có muốn dùng thử không?","s",["Chắc chắn muốn thử","Có thể thử","Muốn xem giao diện trước","Chưa quyết định","Không có nhu cầu"]],
+32:["Bạn muốn ứng dụng được cung cấp theo hình thức nào?","s",["Miễn phí với đầy đủ tính năng cơ bản","Miễn phí cơ bản, trả phí cho tính năng nâng cao","Trả phí một lần","Thuê bao theo tháng hoặc năm nếu thực sự đáng giá","Tôi chỉ muốn sử dụng phiên bản miễn phí","Chưa có ý kiến"]],
+33:["Bạn muốn ứng dụng hoạt động trên nền tảng nào?","m",["iPhone","Android","Apple Watch","Đồng hồ thông minh khác","Website để xem dữ liệu trên máy tính","Muốn sử dụng trên nhiều nền tảng với dữ liệu đồng bộ"]],
+34:["Theo bạn, đâu là điều quan trọng nhất của một ứng dụng sức khỏe tốt?","s",["Theo dõi dữ liệu chính xác","Dễ hiểu và dễ sử dụng","Có thể tổng hợp nhiều nguồn dữ liệu","AI hữu ích và cá nhân hóa","Bảo mật và quyền riêng tư","Thiết kế đẹp","Miễn phí hoặc chi phí hợp lý","Hoạt động ổn định, ít hao pin","Khác"]],
+35:["Bạn có ý tưởng nào muốn chia sẻ thêm không?","t","Nếu có thể thay đổi hoặc thêm bất cứ điều gì vào một ứng dụng sức khỏe, bạn sẽ muốn điều gì?"]
+};
+/* ===== ICON: cùng một bộ nét, một màu ===== */
+const svg=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+const ICONS=[
+svg('<rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M11 18h2"/>'),
+svg('<path d="M3 12h4l2.2-6 4 12 2.3-6H21"/>'),
+svg('<rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/>'),
+svg('<path d="M10.5 4l1.7 4.8L17 10.5l-4.8 1.7L10.5 17l-1.7-4.8L4 10.5l4.8-1.7z"/><path d="M18.5 15v5M16 17.5h5"/>'),
+svg('<path d="M12 3a9 9 0 100 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.3A3.7 3.7 0 0021 11c0-4.4-4-8-9-8z"/><path d="M7.5 11h.01M10 7h.01M15 7h.01"/>'),
+svg('<rect x="4.5" y="11" width="15" height="10" rx="3"/><path d="M8 11V8a4 4 0 018 0v3M12 15.5v1.5"/>'),
+svg('<path d="M21 12a8 8 0 01-11.6 7.1L4 20.5l1.1-4.5A8 8 0 1121 12z"/>')
+];
+const HEART=svg('<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>');
+/* ===== TRẠNG THÁI (giữ trong bộ nhớ khi chuyển bước) ===== */
+const A={},O={},R={name:"",social:""};let step=-1,done=null,sending=false;
+const $=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const app=document.getElementById("app");
+const kind=d=>d[1]==="s"?"s":d[1]==="m"?"m":d[1]==="t"?"t":"x";
+const max=d=>typeof d[1]==="number"?d[1]:0;
+function normalizeSocial(v){
+  v=(v||"").trim();
+  if(!v)return "";
+  if(!/^https?:\/\//i.test(v))v="https://"+v;
+  try{
+    const u=new URL(v);
+    if(!/^https?:$/.test(u.protocol)||!u.hostname.includes(".")||u.username||u.password)return null;
+    return u.href;
+  }catch{return null}
+}
+function opts(id){const d=Q[id];if(d[2]==="@6")return (A[6]||[]).filter(x=>DATA6.includes(x));return d[2]}
+function visible(id){
+  if(id===3)return !["Chưa từng sử dụng","Không biết có những ứng dụng như vậy"].includes(A[2]);
+  if(id===7)return opts(7).length>1;
+  if(id>=18&&id<=21)return A[17]!=="Không có nhu cầu sử dụng AI";
+  return true;
+}
+function qs(s){return SECTIONS[s].q.filter(visible)}
+/* ===== MÀN HÌNH ===== */
+function intro(){
+  app.replaceChildren();
+  const b=$("div","brand");b.append($("i"),$("span",0,"Pulse"));
+  const h=$("h1",0,"Bạn muốn một ứng dụng sức khỏe như thế nào?");
+  const sv=document.createElementNS("http://www.w3.org/2000/svg","svg");sv.setAttribute("viewBox","0 0 400 56");sv.setAttribute("class","pulse");sv.setAttribute("aria-hidden","true");
+  const p=document.createElementNS("http://www.w3.org/2000/svg","path");p.setAttribute("d","M0 30 H120 L140 30 L152 8 L168 50 L182 18 L192 30 H400");sv.append(p);
+  const l=$("p","lead","Mình đang tìm hiểu điều gì thực sự hữu ích ở một ứng dụng sức khỏe — từ theo dõi vận động, giấc ngủ đến cách dữ liệu được hiển thị.");
+  const l2=$("p","lead","Không có đáp án đúng sai. Bạn chỉ cần chọn những điều phù hợp với mình.");
+  const f=$("ul","facts");["Khoảng 3–5 phút","Không cần đăng nhập","Tên dùng để đối chiếu bài làm","Có thể bỏ qua câu hỏi"].forEach((t,n)=>{const li=$("li",0,t);li.style.setProperty("--i",n);f.append(li)});
+  const idc=$("div","idcard");
+  idc.append($("h3",0,"Thông tin người tham gia"));
+  const nameLab=$("label","idfield");nameLab.append($("span",0,"Tên của bạn "),$("b",0,"(bắt buộc)"));
+  const nameInput=document.createElement("input");nameInput.type="text";nameInput.id="rname";nameInput.name="rname";nameInput.maxLength=100;nameInput.autocomplete="name";nameInput.placeholder="Ví dụ: Nguyễn Minh An";nameInput.value=R.name;nameInput.setAttribute("aria-required","true");
+  const nameErr=$("div","warn");nameErr.id="rerr";nameErr.setAttribute("role","alert");
+  nameInput.oninput=()=>{R.name=nameInput.value;nameErr.textContent="";nameInput.removeAttribute("aria-invalid")};
+  nameLab.append(nameInput);
+  const socialLab=$("label","idfield");socialLab.append($("span",0,"Liên kết MXH "),$("b",0,"(không bắt buộc)"));
+  const socialInput=document.createElement("input");socialInput.type="url";socialInput.id="rsocial";socialInput.name="rsocial";socialInput.maxLength=300;socialInput.inputMode="url";socialInput.autocomplete="url";socialInput.autocapitalize="none";socialInput.spellcheck=false;socialInput.placeholder="https://facebook.com/ten-ban";socialInput.value=R.social;
+  socialInput.oninput=()=>{R.social=socialInput.value;nameErr.textContent="";socialInput.removeAttribute("aria-invalid")};
+  socialLab.append(socialInput);
+  idc.append(nameLab,socialLab,$("p","idnote","Tên giúp mình đối chiếu bài làm. Liên kết MXH chỉ dùng khi cần liên hệ và không hiển thị công khai. Dữ liệu được lưu tối đa "+CONFIG.retention+"."),nameErr);
+  const go=$("button","btn start","Bắt đầu khảo sát");
+  go.onclick=()=>{
+    const n=nameInput.value.trim().replace(/\s+/g," ");
+    if(!n){nameErr.textContent="Vui lòng nhập tên của bạn trước khi bắt đầu.";nameInput.setAttribute("aria-invalid","true");nameInput.focus();return}
+    const s=normalizeSocial(socialInput.value);
+    if(s===null){nameErr.textContent="Liên kết MXH chưa hợp lệ. Ví dụ: https://facebook.com/ten-ban";socialInput.setAttribute("aria-invalid","true");socialInput.focus();return}
+    R.name=n;R.social=s;socialInput.value=s;
+    step=0;render();scrollTo(0,0);
+  };
+  const note=$("p","note","Đây là khảo sát nghiên cứu ý tưởng, không phải sản phẩm y tế. "+CONFIG.purpose+" Thời hạn lưu: "+CONFIG.retention+". Vui lòng không nhập thông tin chẩn đoán bệnh hoặc hồ sơ y tế.");
+  app.append(b,h,sv,l,l2,f,idc,go,note);
+  if(!CONFIG.endpoint){const t=$("div","banner","Chế độ thử nghiệm: trang này chưa kết nối máy chủ nên câu trả lời sẽ KHÔNG được lưu.");app.append(t)}
+}
+function field(id){
+  const d=Q[id],k=kind(d),list=opts(id);
+  const m=k==="x"?Math.min(max(d),list.length||max(d)):max(d);
+  const fs=$("fieldset");fs.id="q"+id;
+  const lg=$("legend",0,d[0]);
+  const hint=k==="s"?"Chọn một đáp án":k==="m"?"Chọn nhiều đáp án":k==="x"?`Chọn tối đa ${m} đáp án`:"Không bắt buộc";
+  lg.append($("span","hint",hint+" · không bắt buộc"));
+  fs.append(lg);
+  if(typeof d[3]==="string")fs.append($("p","qnote",d[3]));
+  if(k==="t"){
+    const t=document.createElement("textarea");t.placeholder=d[2];t.maxLength=1000;t.value=A[id]||"";t.setAttribute("aria-label",d[0]);
+    t.oninput=()=>A[id]=t.value;fs.append(t);return fs;
+  }
+  const warn=$("div","warn");warn.setAttribute("role","status");
+  list.forEach((o,ix)=>{
+    const lab=$("label","opt");const i=document.createElement("input");
+    i.type=k==="s"?"radio":"checkbox";i.name="q"+id;i.value=o;
+    const cur=A[id];i.checked=k==="s"?cur===o:(cur||[]).includes(o);
+    lab.style.setProperty("--i",ix);lab.append(i,$("span",0,o));fs.append(lab);
+  });
+  fs.addEventListener("change",e=>{
+    const i=e.target;
+    if(!(i instanceof HTMLInputElement)||i.name!=="q"+id)return;
+    const o=i.value;
+    if(k==="s"){
+      A[id]=o;
+      fs.querySelectorAll(".otherwrap").forEach(x=>x.remove());
+      if(o.startsWith("Khác"))showOther(fs,id,true);
+      syncConditional();
+      return;
+    }
+    let a=(A[id]||[]).filter(x=>x!==o);
+    if(i.checked){
+      if(m&&a.length>=m){i.checked=false;warn.textContent=`Bạn chỉ được chọn tối đa ${m} đáp án. Bỏ một lựa chọn để chọn đáp án khác.`;return}
+      a.push(o)
+    }
+    A[id]=a;warn.textContent="";
+    if(id===6){const s7=document.getElementById("q7");if(s7){A[7]=(A[7]||[]).filter(x=>a.includes(x));s7.remove()}}
+    if(o.startsWith("Khác"))showOther(fs,id,i.checked);
+    syncConditional();
+  });
+  fs.append(warn);
+  const has=(k==="s"?[A[id]]:(A[id]||[])).some(x=>x&&x.startsWith("Khác"));
+  if(has)showOther(fs,id,true);
+  return fs;
+}
+function showOther(fs,id,on){
+  fs.querySelectorAll(".otherwrap").forEach(e=>e.remove());
+  if(!on)return;
+  const w=$("div","otherwrap"),i=document.createElement("input");
+  i.className="other";i.type="text";i.maxLength=200;i.placeholder="Bạn có thể ghi rõ hơn (không bắt buộc)";i.setAttribute("aria-label","Nội dung mục Khác");
+  i.value=O[id]||"";i.oninput=()=>O[id]=i.value;w.append(i);
+  fs.insertBefore(w,fs.querySelector(".warn"));
+}
+/* Câu hỏi phụ thuộc (q3, q7, q18–q21) được thêm/bớt ngay khi câu trả lời
+   liên quan thay đổi, thay vì phải chuyển bước mới cập nhật. */
+function syncConditional(){
+  if(step<0||done)return;
+  const ids=qs(step);
+  [...app.querySelectorAll("fieldset")].forEach(fs=>{
+    const id=Number(fs.id.slice(1));
+    if(!ids.includes(id))fs.remove();
+  });
+  const nav=app.querySelector(".nav");if(!nav)return;
+  ids.forEach((id,index)=>{
+    if(document.getElementById("q"+id))return;
+    const f=field(id);f.style.setProperty("--d",index);
+    const next=ids.slice(index+1).map(x=>document.getElementById("q"+x)).find(Boolean);
+    if(next)next.before(f);else nav.before(f);
+  });
+  const meta=app.querySelector(".meta");
+  if(meta&&meta.lastElementChild)meta.lastElementChild.textContent=`${ids.length} câu`;
+}
+function render(){
+  if(step<0)return intro();
+  if(done)return;
+  app.replaceChildren();
+  const S=SECTIONS[step],ids=qs(step),total=SECTIONS.length;
+  const top=$("div","meta");top.append($("span",0,`Phần ${step+1}/${total}`),$("span",0,`${ids.length} câu`));
+  const bar=$("div","bar");bar.setAttribute("role","progressbar");bar.setAttribute("aria-valuemin","0");bar.setAttribute("aria-valuemax","100");bar.setAttribute("aria-valuenow",Math.round(step/total*100));
+  const fill=$("div");fill.style.width=Math.round(step/total*100)+"%";bar.append(fill);requestAnimationFrame(()=>requestAnimationFrame(()=>fill.style.width=Math.round((step+1)/total*100)+"%"));
+  const sec=$("div","sec");const ic=$("div","ico");ic.innerHTML=ICONS[step];ic.setAttribute("aria-hidden","true");sec.append(ic,$("h2",0,S.n));
+  app.append(top,bar,sec);
+  ids.forEach((id,n)=>{const f=field(id);f.style.setProperty("--d",n);app.append(f)});
+  const hp=document.createElement("input");hp.className="hp";hp.tabIndex=-1;hp.autocomplete="off";hp.id="hp";hp.setAttribute("aria-hidden","true");app.append(hp);
+  const nav=$("div","nav");
+  const back=$("button","btn ghost","Quay lại");back.onclick=()=>{step--;render();scrollTo(0,0)};
+  const last=step===total-1;
+  const next=$("button","btn",last?"Gửi khảo sát":"Tiếp tục");
+  next.onclick=()=>{if(last)submit(next);else{step++;render();scrollTo(0,0)}};
+  nav.append(back,next);app.append(nav);
+  if(last)app.append($("p","note","Bạn có thể bấm “Quay lại” để sửa câu trả lời trước khi gửi."));
+}
+function payload(){
+  const answers={};
+  SECTIONS.forEach((s,i)=>qs(i).forEach(id=>{const v=A[id];if(v&&v.length)answers["q"+id]={a:v,other:O[id]||undefined}}));
+  return {survey:"pulse-v1",submittedAt:new Date().toISOString(),respondent:{name:R.name,social:R.social||undefined},answers};
+}
+async function submit(btn){
+  if(sending)return; // chặn gửi trùng khi bấm nhiều lần
+  if(document.getElementById("hp").value)return; // chống spam đơn giản (honeypot)
+  const p=payload();
+  if(!CONFIG.endpoint){return finish(p,false)}
+  sending=true;
+  btn.disabled=true;btn.textContent="Đang gửi…";
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),20000);
+  let failureCode="";
+  try{
+    const r=await fetch(CONFIG.endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p),signal:ctrl.signal});
+    let data=null;try{data=await r.json()}catch(_){}
+    failureCode=(data&&data.error&&data.error.code)||"";
+    if(!r.ok||!data||data.ok!==true)throw new Error(failureCode||("HTTP "+r.status));
+    finish(p,true); // chỉ báo thành công khi server xác nhận đã lưu
+  }catch(e){
+    sending=false;btn.disabled=false;btn.textContent="Gửi lại";
+    let w=document.getElementById("err");if(!w){w=$("div","banner");w.id="err";w.setAttribute("role","alert");app.insertBefore(w,app.querySelector(".nav"))}
+    w.textContent=failureCode==="rate_limited"
+      ? "Bạn đã gửi quá nhiều lần. Câu trả lời của bạn vẫn còn nguyên, vui lòng thử lại sau ít phút."
+      : e&&e.name==="AbortError"
+        ? "Máy chủ phản hồi quá lâu. Câu trả lời của bạn vẫn còn nguyên, hãy kiểm tra kết nối rồi bấm “Gửi lại”."
+        : "Chưa gửi được câu trả lời. Câu trả lời của bạn vẫn còn nguyên, hãy kiểm tra kết nối rồi bấm “Gửi lại”.";
+  }finally{clearTimeout(timer)}
+}
+function finish(p,saved){
+  sending=false;done=true;app.replaceChildren();
+  const bd=$("div","ico big");bd.innerHTML=HEART;bd.setAttribute("aria-hidden","true");app.append(bd,$("h1",0,"Cảm ơn bạn đã dành thời gian!"),$("p","lead","Những câu trả lời này giúp mình hiểu rõ hơn điều mọi người cần ở một ứng dụng sức khỏe hữu ích, dễ dùng và tôn trọng quyền riêng tư."));
+  if(!saved){
+    const b=$("div","banner","Chế độ thử nghiệm: câu trả lời chưa được lưu ở đâu cả. Bạn có thể tải bản sao về máy để kiểm tra dữ liệu.");
+    const dl=$("button","btn ghost","Tải câu trả lời (JSON)");dl.onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:"application/json"}));a.download="pulse-survey-demo.json";a.click()};
+    b.append(document.createElement("br"),dl);app.append(b);
+  }
+  const nav=$("div","nav");
+  const home=$("button","btn","Quay về trang đầu");home.onclick=()=>{Object.keys(A).forEach(k=>delete A[k]);Object.keys(O).forEach(k=>delete O[k]);R.name="";R.social="";done=null;step=-1;render()};
+  nav.append(home);
+  if(navigator.share){const sh=$("button","btn ghost","Chia sẻ khảo sát");sh.onclick=()=>navigator.share({title:"Khảo sát Pulse",url:location.href}).catch(()=>{});nav.append(sh)}
+  app.append(nav);scrollTo(0,0);showCard();
+}
+function showCard(){
+ const ov=$("div","ov");ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");ov.setAttribute("aria-label","Thiệp cảm ơn");
+ const g=$("div","gc");
+ const ic=$("div","ico big");ic.innerHTML=HEART;ic.setAttribute("aria-hidden","true");
+ const row=$("div","nav"),x=$("button","btn ghost","Đóng"),q=$("button","btn","Thoát");
+ const esc=e=>{if(e.key==="Escape")close()};
+ function close(){ov.classList.add("out");document.removeEventListener("keydown",esc);setTimeout(()=>ov.remove(),250)}
+ x.onclick=close;
+ q.onclick=()=>{close();window.close();setTimeout(()=>{app.replaceChildren();app.append($("h1",0,"Hẹn gặp lại bạn!"),$("p","lead","Bạn đã thoát khảo sát. Bạn có thể đóng tab này."))},480)};
+ row.append(x,q);
+ g.append(ic,$("h2","gt","Cảm ơn bạn rất nhiều!"),$("p","gl","Mỗi câu trả lời đều giúp Pulse gần với điều mọi người thực sự cần hơn."),$("p","gl","Mình sẽ đọc kỹ và luôn tôn trọng quyền riêng tư của bạn."),$("p","gs","Đăng · Pulse"),row);
+ ov.append(g);document.addEventListener("keydown",esc);document.body.append(ov);setTimeout(()=>x.focus(),350);
+}
+function confetti(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;const c=["#14683f","#4cc58a","#bfe9d0","#e6f7c9","#2f9e6a"],frag=document.createDocumentFragment();for(let n=0;n<36;n++){const e=$("span","conf");e.style.left=Math.random()*100+"vw";e.style.background=c[n%5];e.style.setProperty("--x",(Math.random()*160-80)+"px");e.style.setProperty("--r",(Math.random()*720-360)+"deg");e.style.animationDelay=Math.random()*.6+"s";e.style.animationDuration=2.2+Math.random()*1.6+"s";frag.append(e);setTimeout(()=>e.remove(),4500)}document.body.append(frag)}
+
+document.addEventListener("visibilitychange",()=>document.body.classList.toggle("is-idle",document.hidden),{passive:true});
+render();
+</script>
+</body>
+</html>

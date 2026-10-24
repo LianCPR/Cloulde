@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/.branches/
+*.log
+.DS_Store
+
+# Mật khẩu quản trị lưu cục bộ, không commit
+.admin-password.local

@@ -1,0 +1,10 @@
+# Cấu hình tối thiểu cho CLI. Khi dùng `supabase link`, CLI sẽ ghi project-ref vào .temp (đã gitignore).
+project_id = "pulse-survey"
+
+[functions.submit-survey]
+# Khảo sát công khai: người tham gia không đăng nhập.
+verify_jwt = false
+
+[functions.admin-responses]
+# Trang quản trị tự xác thực bằng header x-admin-key, không dùng JWT Supabase.
+verify_jwt = false
